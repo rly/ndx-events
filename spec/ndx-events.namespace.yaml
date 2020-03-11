@@ -1,0 +1,13 @@
+namespaces:
+- author:
+  - Ryan Ly
+  contact:
+  - rly@lbl.gov
+  doc: NWB extension to store event and TTL pulse data
+  name: ndx-events
+  schema:
+  - namespace: core
+    neurodata_types:
+    - ElectricalSeries
+  - source: ndx-events.extensions.yaml
+  version: 0.1.0
