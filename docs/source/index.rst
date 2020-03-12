@@ -1,5 +1,5 @@
 Specification for the ndx-events extension
-==================================
+==========================================
 
 .. toctree::
     :numbered:
