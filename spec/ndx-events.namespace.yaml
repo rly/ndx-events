@@ -8,6 +8,9 @@ namespaces:
   schema:
   - namespace: core
     neurodata_types:
-    - ElectricalSeries
+    - NWBDataInterface
+    - DynamicTable
+    - VectorData
+    - VectorIndex
   - source: ndx-events.extensions.yaml
   version: 0.1.0

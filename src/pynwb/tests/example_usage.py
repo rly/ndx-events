@@ -1,15 +1,3 @@
-# ndx-events Extension for NWB
-
-## Installation
-
-TODO:
-```
-pip install ndx-events
-```
-
-## Usage
-
-```python
 from pynwb import NWBFile, NWBHDF5IO
 from ndx_events import LabeledEvents, AnnotatedEvents
 
@@ -60,6 +48,3 @@ with NWBHDF5IO(filename, 'w') as io:
 with NWBHDF5IO(filename, 'r', load_namespaces=True) as io:
     nwb = io.read()
     print(nwb)
-```
-
-This extension was created using [ndx-template](https://github.com/nwb-extensions/ndx-template).
