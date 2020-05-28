@@ -78,11 +78,11 @@ class TestEventsIOSimple(TestCase):
             id=5
         )
 
-        behavior_module = self.nwbfile.create_processing_module(
-            name='behavior',
-            description='processed behavioral data'
+        events_module = self.nwbfile.create_processing_module(
+            name='events',
+            description='processed events data'
         )
-        behavior_module.add(annotated_events)
+        events_module.add(annotated_events)
 
         with NWBHDF5IO(self.path, mode='w') as io:
             io.write(self.nwbfile)
@@ -92,7 +92,7 @@ class TestEventsIOSimple(TestCase):
             self.assertContainerEqual(events, read_nwbfile.acquisition['Events'])
             self.assertContainerEqual(labeled_events, read_nwbfile.acquisition['LabeledEvents'])
             self.assertContainerEqual(ttls, read_nwbfile.acquisition['TTLs'])
-            self.assertContainerEqual(annotated_events, read_nwbfile.processing['behavior']['AnnotatedEvents'])
+            self.assertContainerEqual(annotated_events, read_nwbfile.processing['events']['AnnotatedEvents'])
 
 
 class TestEventsIO(AcquisitionH5IOMixin, TestCase):

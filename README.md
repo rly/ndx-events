@@ -23,7 +23,7 @@ nwb = NWBFile(
 )
 
 events = LabeledEvents(
-    name='my_events',
+    name='LabeledEvents',
     description='events from my experiment',
     timestamps=[0., 1., 2.],
     resolution=1e-5,
@@ -33,7 +33,7 @@ events = LabeledEvents(
 nwb.add_acquisition(events)
 
 annotated_events = AnnotatedEvents(
-    name='my_annotated_events',
+    name='AnnotatedEvents',
     description='annotated events from my experiment',
     resolution=1e-5
 )
@@ -48,11 +48,14 @@ annotated_events.add_event_type(
     extra='extra',
     id=3
 )
-nwb.create_processing_module(name='events', description='processed event data')
-nwb.processing['events'].add(annotated_events)
+events_module = nwb.create_processing_module(
+    name='events',
+    description='processed event data'
+)
+events_module.add(annotated_events)
 
 # Write nwb file
-filename = 'example_usage.nwb'
+filename = 'test.nwb'
 with NWBHDF5IO(filename, 'w') as io:
     io.write(nwb)
 
