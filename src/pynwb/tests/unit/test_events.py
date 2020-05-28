@@ -10,12 +10,12 @@ class TestEvents(TestCase):
 
     def test_init(self):
         events = Events(
-            name='my_events',
+            name='Events',
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5
         )
-        self.assertEqual(events.name, 'my_events')
+        self.assertEqual(events.name, 'Events')
         self.assertEqual(events.description, 'events from my experiment')
         self.assertEqual(events.timestamps, [0., 1., 2.])
         self.assertEqual(events.resolution, 1e-5)
@@ -26,14 +26,14 @@ class TestLabeledEvents(TestCase):
 
     def test_init(self):
         events = LabeledEvents(
-            name='my_events',
+            name='LabeledEvents',
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
             label_keys=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
-        self.assertEqual(events.name, 'my_events')
+        self.assertEqual(events.name, 'LabeledEvents')
         self.assertEqual(events.description, 'events from my experiment')
         self.assertEqual(events.timestamps, [0., 1., 2.])
         self.assertEqual(events.resolution, 1e-5)
@@ -45,7 +45,7 @@ class TestLabeledEvents(TestCase):
         msg = 'Timestamps and label_keys must have the same length: 3 != 4'
         with self.assertRaisesWith(ValueError, msg):
             LabeledEvents(
-                name='my_events',
+                name='LabeledEvents',
                 description='events from my experiment',
                 timestamps=[0., 1., 2.],
                 resolution=1e-5,
@@ -55,7 +55,7 @@ class TestLabeledEvents(TestCase):
 
     def test_defaultlabels(self):
         events = LabeledEvents(
-            name='my_events',
+            name='LabeledEvents',
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
@@ -67,7 +67,7 @@ class TestLabeledEvents(TestCase):
         msg = "None values are not allowed in the labels array. Please use '' for undefined label keys."
         with self.assertRaisesWith(ValueError, msg):
             LabeledEvents(
-                name='my_events',
+                name='LabeledEvents',
                 description='events from my experiment',
                 timestamps=[0., 1., 2.],
                 resolution=1e-5,
@@ -80,15 +80,15 @@ class TestTTLs(TestCase):
 
     def test_init(self):
         events = TTLs(
-            name='my_events',
-            description='events from my experiment',
+            name='TTLs',
+            description='ttl pulses from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
             label_keys=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
-        self.assertEqual(events.name, 'my_events')
-        self.assertEqual(events.description, 'events from my experiment')
+        self.assertEqual(events.name, 'TTLs')
+        self.assertEqual(events.description, 'ttl pulses from my experiment')
         self.assertEqual(events.timestamps, [0., 1., 2.])
         self.assertEqual(events.resolution, 1e-5)
         self.assertEqual(events.unit, 'seconds')
@@ -100,17 +100,17 @@ class TestAnnotatedEvents(TestCase):
 
     def test_init(self):
         events = AnnotatedEvents(
-            name='my_annotated_events',
+            name='AnnotatedEvents',
             description='annotated events from my experiment',
             resolution=1e-5
         )
-        self.assertEqual(events.name, 'my_annotated_events')
+        self.assertEqual(events.name, 'AnnotatedEvents')
         self.assertEqual(events.description, 'annotated events from my experiment')
         self.assertEqual(events.resolution, 1e-5)
 
     def test_add_event_type(self):
         events = AnnotatedEvents(
-            name='my_annotated_events',
+            name='AnnotatedEvents',
             description='annotated events from my experiment'
         )
         events.add_event_type(
