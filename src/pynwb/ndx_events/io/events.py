@@ -6,7 +6,7 @@ from hdmf.common import VectorData
 from hdmf.utils import getargs, docval
 from hdmf.spec import AttributeSpec
 
-from ..events import Events, AnnotatedEvents
+from ..events import Events, LabeledEvents, AnnotatedEvents
 
 
 @register_map(Events)
@@ -17,6 +17,15 @@ class EventsMap(NWBContainerMapper):
         timestamps_spec = self.spec.get_dataset('timestamps')
         self.map_spec('unit', timestamps_spec.get_attribute('unit'))
         self.map_spec('resolution', timestamps_spec.get_attribute('resolution'))
+
+
+@register_map(LabeledEvents)
+class LabeledEventsMap(EventsMap):
+
+    def __init__(self, spec):
+        super().__init__(spec)
+        label_keys_spec = self.spec.get_dataset('label_keys')
+        self.map_spec('labels', label_keys_spec.get_attribute('labels'))
 
 
 @register_map(AnnotatedEvents)

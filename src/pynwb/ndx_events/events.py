@@ -140,5 +140,4 @@ class AnnotatedEvents(DynamicTable):
             allow_extra=True)
     def add_event_type(self, **kwargs):
         """Add an event type as a row to this table."""
-        # TODO columns do not exist and are hitting table.py line 377 for a name clash
         super().add_row(**kwargs)

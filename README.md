@@ -1,8 +1,15 @@
 # ndx-events Extension for NWB
 
+This is an NWB extension for storing event information and TTL pulses. Events can be:
+1. Simple events. These are stored in the `Events` type. The `Events` type consists of only a name, a description,
+and a 1D array of timestamps. This should be used instead of a `TimeSeries` when the time series has no data.
+2. Labeled events. These are stored in the `LabeledEvents` type. The `LabeledEvents` type expands on the `Events` type
+by adding a 1D array of integer label keys with the same length as the timestamps and a 1D array of labels. The label
+keys are indices into the array of labels. This can be used to encode more information about individual events, such as
+the reward values for reward events.
+
 ## Installation
 
-TODO:
 ```
 pip install ndx-events
 ```

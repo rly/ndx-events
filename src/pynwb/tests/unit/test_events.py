@@ -120,7 +120,7 @@ class TestAnnotatedEvents(TestCase):
             id=3
         )
         self.assertEqual(events.id.data, [3])
-        self.assertEqual(events.event_times.data, [1., 2., 3.])
+        self.assertEqual(events['event_times'][0], [1., 2., 3.])
         self.assertEqual(events.colnames, ('event_times', 'label', 'event_description'))
         self.assertEqual(len(events.columns), 4)
         self.assertEqual(events.columns[0].name, 'event_times_index')
