@@ -119,8 +119,19 @@ class TestAnnotatedEvents(TestCase):
             event_times=[1., 2., 3.],
             id=3
         )
-        self.assertEqual(events.id.data, [3])
+        events.add_event_type(
+            label='Abort',
+            event_description='Times when the animal aborted the trial.',
+            event_times=[0.5, 4.5],
+            id=4
+        )
+        self.assertEqual(events.id.data, [3, 4])
         self.assertEqual(events['event_times'][0], [1., 2., 3.])
+        self.assertEqual(events['event_times'][1], [0.5, 4.5])
+        self.assertEqual(events['label'][0], 'Reward')
+        self.assertEqual(events['label'][1], 'Abort')
+        self.assertListEqual(events['event_description'].data, ['Times when the animal received juice reward.',
+                                                                'Times when the animal aborted the trial.'])
         self.assertEqual(events.colnames, ('event_times', 'label', 'event_description'))
         self.assertEqual(len(events.columns), 4)
         self.assertEqual(events.columns[0].name, 'event_times_index')
