@@ -28,7 +28,7 @@ setup_args = {
     'long_description_content_type': readme_type,
     'author': 'Ryan Ly',
     'author_email': 'rly@lbl.gov',
-    'url': '',
+    'url': 'https://github.com/rly/ndx-events',
     'license': 'BSD 3-Clause',
     'install_requires': [
         'pynwb>=1.1.2'
