@@ -3,7 +3,7 @@ import numpy as np
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.testing import AcquisitionH5IOMixin, TestCase, remove_test_file
 
-from ndx_events import Events, LabeledEvents, TTLs, AnnotatedEvents
+from ndx_events import Events, LabeledEvents, TTLs, AnnotatedEventsTable
 
 
 class TestEventsIOSimple(TestCase):
@@ -54,8 +54,8 @@ class TestEventsIOSimple(TestCase):
         )
         self.nwbfile.add_acquisition(ttls)
 
-        annotated_events = AnnotatedEvents(
-            name='AnnotatedEvents',
+        annotated_events = AnnotatedEventsTable(
+            name='AnnotatedEventsTable',
             description='annotated events from my experiment',
             resolution=1e-5
         )
@@ -92,7 +92,7 @@ class TestEventsIOSimple(TestCase):
             self.assertContainerEqual(events, read_nwbfile.acquisition['Events'])
             self.assertContainerEqual(labeled_events, read_nwbfile.acquisition['LabeledEvents'])
             self.assertContainerEqual(ttls, read_nwbfile.acquisition['TTLs'])
-            self.assertContainerEqual(annotated_events, read_nwbfile.processing['events']['AnnotatedEvents'])
+            self.assertContainerEqual(annotated_events, read_nwbfile.processing['events']['AnnotatedEventsTable'])
 
 
 class TestEventsIO(AcquisitionH5IOMixin, TestCase):
@@ -138,13 +138,13 @@ class TestTTLs(AcquisitionH5IOMixin, TestCase):
         return ttls
 
 
-class TestAnnotatedEventsIO(AcquisitionH5IOMixin, TestCase):
-    """ Test adding AnnotatedEvents into acquisition and accessing AnnotatedEvents after read """
+class TestAnnotatedEventsTableIO(AcquisitionH5IOMixin, TestCase):
+    """ Test adding AnnotatedEventsTable into acquisition and accessing AnnotatedEvents after read """
 
     def setUpContainer(self):
-        """ Return the test AnnotatedEvents to read/write """
-        annotated_events = AnnotatedEvents(
-            name='AnnotatedEvents',
+        """ Return the test AnnotatedEventsTable to read/write """
+        annotated_events = AnnotatedEventsTable(
+            name='AnnotatedEventsTable',
             description='annotated events from my experiment',
             resolution=1e-5
         )

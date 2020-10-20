@@ -140,8 +140,8 @@ def main():
         doc='Description for each event type.',
     )
 
-    annotated_events = NWBGroupSpec(
-        neurodata_type_def='AnnotatedEvents',
+    annotated_events_table = NWBGroupSpec(
+        neurodata_type_def='AnnotatedEventsTable',
         neurodata_type_inc='DynamicTable',
         doc=("Table to hold event timestamps and event metadata relevant to data preprocessing and analysis. Each "
              "row corresponds to a different event type. Use the 'event_times' dataset to store timestamps for each "
@@ -149,7 +149,7 @@ def main():
         datasets=[event_times_index, event_times, label_col, description_col],
     )
 
-    new_data_types = [events, labeled_events, ttls, annotated_events]
+    new_data_types = [events, labeled_events, ttls, annotated_events_table]
 
     # export the spec to yaml files in the spec folder
     output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'spec'))

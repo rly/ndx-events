@@ -57,7 +57,8 @@ class LabeledEvents(Events):
     @docval(*get_docval(Events.__init__, 'name', 'description', 'timestamps'),  # required
             {'name': 'label_keys', 'type': ('array_data', 'data'),  # required
              'doc': ("Integer labels that map onto strings using the mapping in the 'labels' dataset. "
-                     "Values must be 0 or greater and need not be sequential. This dataset should "
+                     "Values must be 0 or greater and need not be sequential. If a list/tuple/array of integer values "
+                     "is passed, it will be converted to a numpy array of unsigned integer values. This dataset should "
                      "have the same number of elements as the 'timestamps' dataset."),
              'shape': (None,)},
             {'name': 'labels', 'type': ('array_data', 'data'),
@@ -75,6 +76,7 @@ class LabeledEvents(Events):
         if len(timestamps) != len(label_keys):
             raise ValueError('Timestamps and label_keys must have the same length: %d != %d'
                              % (len(timestamps), len(label_keys)))
+        label_keys = self.__check_label_keys_uint(label_keys)
         self.label_keys = label_keys
         if labels is None:
             unique_keys = np.unique(label_keys)
@@ -86,6 +88,27 @@ class LabeledEvents(Events):
                 raise ValueError("None values are not allowed in the labels array. Please use '' for undefined label "
                                  "keys.")
             self.labels = labels
+
+    def __check_label_keys_uint(self, label_keys):
+        """Convert a list/tuple of integer label keys to a numpy array of unsigned integers. Raise error if negative
+        or non-numeric values are found. If something other than a list/tuple/np.ndarray of ints or unsigned ints
+        is provided, return the original array.
+        """
+        new_label_keys = label_keys
+        if isinstance(new_label_keys, (list, tuple)):
+            new_label_keys = np.array(new_label_keys)
+        if isinstance(new_label_keys, np.ndarray):
+            if not np.issubdtype(new_label_keys.dtype, np.number):
+                raise ValueError("'label_keys' must be an array of numeric values that have type unsigned int or "
+                                 "can be converted to unsigned int, not type %s" % new_label_keys.dtype)
+            if np.issubdtype(new_label_keys.dtype, np.unsignedinteger):
+                return new_label_keys
+            if (new_label_keys < 0).any():
+                raise ValueError("Negative values are not allowed in 'label_keys'.")
+            if np.issubdtype(new_label_keys.dtype, np.integer):
+                return new_label_keys.astype(np.uint)
+            # all other array dtypes will not be handled. the objectmapper will attempt to convert the data
+        return label_keys
 
 
 @register_class('TTLs', 'ndx-events')
@@ -101,8 +124,8 @@ class TTLs(LabeledEvents):
     pass
 
 
-@register_class('AnnotatedEvents', 'ndx-events')
-class AnnotatedEvents(DynamicTable):
+@register_class('AnnotatedEventsTable', 'ndx-events')
+class AnnotatedEventsTable(DynamicTable):
     """
     Table to hold event timestamps and event metadata relevant to data preprocessing
     and analysis. Each row corresponds to a different event type. Use the 'event_time'
@@ -122,7 +145,8 @@ class AnnotatedEvents(DynamicTable):
     )
 
     @docval({'name': 'description', 'type': str, 'doc': 'Description of what is in this table'},
-            {'name': 'name', 'type': str, 'doc': 'Name of this AnnotatedEvents table', 'default': 'AnnotatedEvents'},
+            {'name': 'name', 'type': str, 'doc': 'Name of this AnnotatedEventsTable',
+             'default': 'AnnotatedEventsTable'},
             {'name': 'resolution', 'type': float,
              'doc': ('The smallest possible difference between two event times. Usually 1 divided '
                      'by the event time sampling rate on the data acquisition system.'),

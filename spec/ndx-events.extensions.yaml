@@ -66,10 +66,10 @@ groups:
     corresponds to a pulse value of n. For example, the first value (index 0) of the
     'labels' dataset corresponds to a pulse value of 0. See the LabeledEvents type
     for more details.
-- neurodata_type_def: AnnotatedEvents
+- neurodata_type_def: AnnotatedEventsTable
   neurodata_type_inc: DynamicTable
   doc: Table to hold event timestamps and event metadata relevant to data preprocessing
-    and analysis. Each row corresponds to a different event type. Use the 'event_time'
+    and analysis. Each row corresponds to a different event type. Use the 'event_times'
     dataset to store timestamps for each event type. Add user-defined columns to add
     metadata for each event type or event time.
   datasets:

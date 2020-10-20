@@ -3,7 +3,7 @@ import numpy as np
 from pynwb.testing import TestCase
 from pynwb.core import VectorData, VectorIndex
 
-from ndx_events import Events, LabeledEvents, TTLs, AnnotatedEvents
+from ndx_events import Events, LabeledEvents, TTLs, AnnotatedEventsTable
 
 
 class TestEvents(TestCase):
@@ -53,7 +53,7 @@ class TestLabeledEvents(TestCase):
                 labels=['', '', '', 'event1', 'event2', 'event3']
             )
 
-    def test_defaultlabels(self):
+    def test_default_labels(self):
         events = LabeledEvents(
             name='LabeledEvents',
             description='events from my experiment',
@@ -74,6 +74,55 @@ class TestLabeledEvents(TestCase):
                 label_keys=np.uint([3, 4, 3]),
                 labels=[None, None, None, 'event1', 'event2']
             )
+
+    def test_label_keys_negative(self):
+        msg = "Negative values are not allowed in 'label_keys'."
+        with self.assertRaisesWith(ValueError, msg):
+            LabeledEvents(
+                name='LabeledEvents',
+                description='events from my experiment',
+                timestamps=[0., 1., 2.],
+                resolution=1e-5,
+                label_keys=[1, -2, 3],
+                labels=['', '', '', 'event1', 'event2']
+            )
+
+    def test_label_keys_int_conversion(self):
+        le = LabeledEvents(
+            name='LabeledEvents',
+            description='events from my experiment',
+            timestamps=[0., 1., 2.],
+            resolution=1e-5,
+            label_keys=[1, 2, 3],
+            labels=['', '', '', 'event1', 'event2']
+        )
+        np.testing.assert_array_equal(le.label_keys, np.array([1, 2, 3]))
+        self.assertEqual(le.label_keys.dtype, np.uint)
+
+    def test_label_keys_string(self):
+        msg = ("'label_keys' must be an array of numeric values that have type unsigned int or "
+               "can be converted to unsigned int, not type <U1")
+        with self.assertRaisesWith(ValueError, msg):
+            LabeledEvents(
+                name='LabeledEvents',
+                description='events from my experiment',
+                timestamps=[0., 1., 2.],
+                resolution=1e-5,
+                label_keys=['1', '2', '3'],
+                labels=['', '', '', 'event1', 'event2']
+            )
+
+    def test_label_keys_pass_through(self):
+        label_keys = [1.0, 2.0, 3.0]
+        le = LabeledEvents(
+            name='LabeledEvents',
+            description='events from my experiment',
+            timestamps=[0., 1., 2.],
+            resolution=1e-5,
+            label_keys=label_keys,
+            labels=['', '', '', 'event1', 'event2']
+        )
+        self.assertIs(le.label_keys, label_keys)
 
 
 class TestTTLs(TestCase):
@@ -96,21 +145,21 @@ class TestTTLs(TestCase):
         self.assertEqual(events.labels, ['', '', '', 'event1', 'event2'])
 
 
-class TestAnnotatedEvents(TestCase):
+class TestAnnotatedEventsTable(TestCase):
 
     def test_init(self):
-        events = AnnotatedEvents(
-            name='AnnotatedEvents',
+        events = AnnotatedEventsTable(
+            name='AnnotatedEventsTable',
             description='annotated events from my experiment',
             resolution=1e-5
         )
-        self.assertEqual(events.name, 'AnnotatedEvents')
+        self.assertEqual(events.name, 'AnnotatedEventsTable')
         self.assertEqual(events.description, 'annotated events from my experiment')
         self.assertEqual(events.resolution, 1e-5)
 
     def test_add_event_type(self):
-        events = AnnotatedEvents(
-            name='AnnotatedEvents',
+        events = AnnotatedEventsTable(
+            name='AnnotatedEventsTable',
             description='annotated events from my experiment'
         )
         events.add_event_type(
