@@ -67,7 +67,7 @@ annotated_events = AnnotatedEventsTable(
 # add a custom indexed (ragged) column to represent whether each event time was a bad event
 annotated_events.add_column(
     name='bad_event',
-    description='extra metadata for each event type',
+    description='whether each event time should be excluded',
     index=True
 )
 # add an event type (row) to the AnnotatedEventsTable instance
