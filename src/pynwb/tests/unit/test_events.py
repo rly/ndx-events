@@ -30,7 +30,7 @@ class TestLabeledEvents(TestCase):
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
         self.assertEqual(events.name, 'LabeledEvents')
@@ -38,18 +38,18 @@ class TestLabeledEvents(TestCase):
         self.assertEqual(events.timestamps, [0., 1., 2.])
         self.assertEqual(events.resolution, 1e-5)
         self.assertEqual(events.unit, 'seconds')
-        np.testing.assert_array_equal(events.label_keys, np.uint([3, 4, 3])),
+        np.testing.assert_array_equal(events.data, np.uint([3, 4, 3])),
         self.assertEqual(events.labels, ['', '', '', 'event1', 'event2'])
 
     def test_mismatch_length(self):
-        msg = 'Timestamps and label_keys must have the same length: 3 != 4'
+        msg = 'Timestamps and data must have the same length: 3 != 4'
         with self.assertRaisesWith(ValueError, msg):
             LabeledEvents(
                 name='LabeledEvents',
                 description='events from my experiment',
                 timestamps=[0., 1., 2.],
                 resolution=1e-5,
-                label_keys=np.uint([3, 4, 3, 5]),
+                data=np.uint([3, 4, 3, 5]),
                 labels=['', '', '', 'event1', 'event2', 'event3']
             )
 
@@ -59,48 +59,48 @@ class TestLabeledEvents(TestCase):
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
         )
         self.assertEqual(events.labels, ['', '', '', '3', '4'])
 
     def test_none_in_labels(self):
-        msg = "None values are not allowed in the labels array. Please use '' for undefined label keys."
+        msg = "None values are not allowed in the labels array. Please use '' for undefined labels."
         with self.assertRaisesWith(ValueError, msg):
             LabeledEvents(
                 name='LabeledEvents',
                 description='events from my experiment',
                 timestamps=[0., 1., 2.],
                 resolution=1e-5,
-                label_keys=np.uint([3, 4, 3]),
+                data=np.uint([3, 4, 3]),
                 labels=[None, None, None, 'event1', 'event2']
             )
 
-    def test_label_keys_negative(self):
-        msg = "Negative values are not allowed in 'label_keys'."
+    def test_data_negative(self):
+        msg = "Negative values are not allowed in 'data'."
         with self.assertRaisesWith(ValueError, msg):
             LabeledEvents(
                 name='LabeledEvents',
                 description='events from my experiment',
                 timestamps=[0., 1., 2.],
                 resolution=1e-5,
-                label_keys=[1, -2, 3],
+                data=[1, -2, 3],
                 labels=['', '', '', 'event1', 'event2']
             )
 
-    def test_label_keys_int_conversion(self):
+    def test_data_int_conversion(self):
         le = LabeledEvents(
             name='LabeledEvents',
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=[1, 2, 3],
+            data=[1, 2, 3],
             labels=['', '', '', 'event1', 'event2']
         )
-        np.testing.assert_array_equal(le.label_keys, np.array([1, 2, 3]))
-        self.assertEqual(le.label_keys.dtype, np.uint)
+        np.testing.assert_array_equal(le.data, np.array([1, 2, 3]))
+        self.assertEqual(le.data.dtype, np.uint)
 
-    def test_label_keys_string(self):
-        msg = ("'label_keys' must be an array of numeric values that have type unsigned int or "
+    def test_data_string(self):
+        msg = ("'data' must be an array of numeric values that have type unsigned int or "
                "can be converted to unsigned int, not type <U1")
         with self.assertRaisesWith(ValueError, msg):
             LabeledEvents(
@@ -108,21 +108,21 @@ class TestLabeledEvents(TestCase):
                 description='events from my experiment',
                 timestamps=[0., 1., 2.],
                 resolution=1e-5,
-                label_keys=['1', '2', '3'],
+                data=['1', '2', '3'],
                 labels=['', '', '', 'event1', 'event2']
             )
 
-    def test_label_keys_pass_through(self):
-        label_keys = [1.0, 2.0, 3.0]
+    def test_data_pass_through(self):
+        data = [1.0, 2.0, 3.0]
         le = LabeledEvents(
             name='LabeledEvents',
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=label_keys,
+            data=data,
             labels=['', '', '', 'event1', 'event2']
         )
-        self.assertIs(le.label_keys, label_keys)
+        self.assertIs(le.data, data)
 
 
 class TestTTLs(TestCase):
@@ -133,7 +133,7 @@ class TestTTLs(TestCase):
             description='ttl pulses from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
         self.assertEqual(events.name, 'TTLs')
@@ -141,7 +141,7 @@ class TestTTLs(TestCase):
         self.assertEqual(events.timestamps, [0., 1., 2.])
         self.assertEqual(events.resolution, 1e-5)
         self.assertEqual(events.unit, 'seconds')
-        np.testing.assert_array_equal(events.label_keys, np.uint([3, 4, 3])),
+        np.testing.assert_array_equal(events.data, np.uint([3, 4, 3])),
         self.assertEqual(events.labels, ['', '', '', 'event1', 'event2'])
 
 

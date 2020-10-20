@@ -41,85 +41,83 @@ class LabeledEvents(Events):
     A list of timestamps, stored in seconds, of an event that can have different
     labels. For example, this type could represent the times that reward was given,
     as well as which of three different types of reward was given. In this case, the
-    'label_keys' dataset would contain values {0, 1, 2}, and the 'labels' dataset
+    'data' dataset would contain values {0, 1, 2}, and the 'labels' dataset
     would contain three text elements, where the first (index 0) specifies the name
-    of the reward associated with a label_keys = 0, the second (index 1) specifies
-    the name of the reward associated with a label_keys = 1, etc. The labels do not
-    have to start at 0 and do not need to be sequential, e.g. the 'label_keys' dataset
+    of the reward associated with data = 0, the second (index 1) specifies
+    the name of the reward associated with data = 1, etc. The labels do not
+    have to start at 0 and do not need to be sequential, e.g. the 'data' dataset
     could contain values {0, 10, 100}, and the 'labels' dataset could contain 101
     values, where labels[0] is 'No reward', labels[10] is '10% reward', labels[100]
     is 'Full reward', and all other entries in 'labels' are the empty string.
     """
 
-    __nwbfields__ = ('label_keys',
+    __nwbfields__ = ('data',
                      'labels')
 
     @docval(*get_docval(Events.__init__, 'name', 'description', 'timestamps'),  # required
-            {'name': 'label_keys', 'type': ('array_data', 'data'),  # required
-             'doc': ("Integer labels that map onto strings using the mapping in the 'labels' dataset. "
+            {'name': 'data', 'type': ('array_data', 'data'),  # required
+             'doc': ("Unsigned integer labels that map onto strings using the mapping in the 'labels' dataset. "
                      "Values must be 0 or greater and need not be sequential. If a list/tuple/array of integer values "
                      "is passed, it will be converted to a numpy array of unsigned integer values. This dataset should "
                      "have the same number of elements as the 'timestamps' dataset."),
              'shape': (None,)},
             {'name': 'labels', 'type': ('array_data', 'data'),
              'doc': ("Mapping from an integer (the zero-based index) to a string, used to understand "
-                     "the integer values in the 'label_keys' dataset. Use an empty string to represent "
+                     "the integer values in the 'data' dataset. Use an empty string to represent "
                      "a label value that is not mapped to any text. Use '' to represent any values "
                      "that are None or empty. If the argument is not specified, the label "
-                     "will be set to the string representation of the label keys and '' for other values."),
+                     "will be set to the string representation of the data value and '' for other values."),
              'shape': (None,), 'default': None},
             *get_docval(Events.__init__, 'resolution'))
     def __init__(self, **kwargs):
         timestamps = getargs('timestamps', kwargs)
-        label_keys, labels = popargs('label_keys', 'labels', kwargs)
+        data, labels = popargs('data', 'labels', kwargs)
         call_docval_func(super().__init__, kwargs)
-        if len(timestamps) != len(label_keys):
-            raise ValueError('Timestamps and label_keys must have the same length: %d != %d'
-                             % (len(timestamps), len(label_keys)))
-        label_keys = self.__check_label_keys_uint(label_keys)
-        self.label_keys = label_keys
+        if len(timestamps) != len(data):
+            raise ValueError('Timestamps and data must have the same length: %d != %d'
+                             % (len(timestamps), len(data)))
+        data = self.__check_label_indices_uint(data)
+        self.data = data
         if labels is None:
-            unique_keys = np.unique(label_keys)
-            self.labels = [''] * (max(unique_keys) + 1)
-            for k in unique_keys:
+            unique_indices = np.unique(data)
+            self.labels = [''] * (max(unique_indices) + 1)
+            for k in unique_indices:
                 self.labels[k] = str(k)
         else:
             if None in labels:
-                raise ValueError("None values are not allowed in the labels array. Please use '' for undefined label "
-                                 "keys.")
+                raise ValueError("None values are not allowed in the labels array. Please use '' for undefined labels.")
             self.labels = labels
 
-    def __check_label_keys_uint(self, label_keys):
-        """Convert a list/tuple of integer label keys to a numpy array of unsigned integers. Raise error if negative
+    def __check_label_indices_uint(self, data):
+        """Convert a list/tuple of integer label indices to a numpy array of unsigned integers. Raise error if negative
         or non-numeric values are found. If something other than a list/tuple/np.ndarray of ints or unsigned ints
         is provided, return the original array.
         """
-        new_label_keys = label_keys
-        if isinstance(new_label_keys, (list, tuple)):
-            new_label_keys = np.array(new_label_keys)
-        if isinstance(new_label_keys, np.ndarray):
-            if not np.issubdtype(new_label_keys.dtype, np.number):
-                raise ValueError("'label_keys' must be an array of numeric values that have type unsigned int or "
-                                 "can be converted to unsigned int, not type %s" % new_label_keys.dtype)
-            if np.issubdtype(new_label_keys.dtype, np.unsignedinteger):
-                return new_label_keys
-            if (new_label_keys < 0).any():
-                raise ValueError("Negative values are not allowed in 'label_keys'.")
-            if np.issubdtype(new_label_keys.dtype, np.integer):
-                return new_label_keys.astype(np.uint)
+        new_data = data
+        if isinstance(new_data, (list, tuple)):
+            new_data = np.array(new_data)
+        if isinstance(new_data, np.ndarray):
+            if not np.issubdtype(new_data.dtype, np.number):
+                raise ValueError("'data' must be an array of numeric values that have type unsigned int or "
+                                 "can be converted to unsigned int, not type %s" % new_data.dtype)
+            if np.issubdtype(new_data.dtype, np.unsignedinteger):
+                return new_data
+            if (new_data < 0).any():
+                raise ValueError("Negative values are not allowed in 'data'.")
+            if np.issubdtype(new_data.dtype, np.integer):
+                return new_data.astype(np.uint)
             # all other array dtypes will not be handled. the objectmapper will attempt to convert the data
-        return label_keys
+        return data
 
 
 @register_class('TTLs', 'ndx-events')
 class TTLs(LabeledEvents):
     """
-    Data type to hold timestamps of TTL pulses. The 'label_keys' dataset contains
-    the integer pulse values, and the 'labels' dataset contains user-defined labels
-    associated with each pulse value. The value at index n of the 'labels' dataset
-    corresponds to a pulse value of n. For example, the first value (index 0) of the
-    'labels' dataset corresponds to a pulse value of 0. See the LabeledEvents type
-    for more details.
+    Data type to hold timestamps of TTL pulses. The 'data' dataset contains the integer pulse values
+    (or channel IDs), and the 'labels' dataset contains user-defined labels associated with each pulse
+    value (or channel ID). The value at index i of the 'labels' dataset corresponds to a pulse value (or
+    channel ID) of i in the 'data' dataset. For example, the first value (index 0) of the 'labels' dataset
+    corresponds to a pulse value of 0. See the LabeledEvents type for more details.
     """
     pass
 

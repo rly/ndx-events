@@ -39,7 +39,7 @@ class TestEventsIOSimple(TestCase):
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
         self.nwbfile.add_acquisition(labeled_events)
@@ -49,7 +49,7 @@ class TestEventsIOSimple(TestCase):
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
         self.nwbfile.add_acquisition(ttls)
@@ -117,7 +117,7 @@ class TestLabeledEventsIO(AcquisitionH5IOMixin, TestCase):
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
         return labeled_events
@@ -132,7 +132,7 @@ class TestTTLs(AcquisitionH5IOMixin, TestCase):
             description='events from my experiment',
             timestamps=[0., 1., 2.],
             resolution=1e-5,
-            label_keys=np.uint([3, 4, 3]),
+            data=np.uint([3, 4, 3]),
             labels=['', '', '', 'event1', 'event2']
         )
         return ttls

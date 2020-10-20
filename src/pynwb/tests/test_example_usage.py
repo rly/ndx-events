@@ -16,7 +16,7 @@ def test_example_usage():
         description='events from my experiment',
         timestamps=[0., 0.5, 0.6, 2., 2.05, 3., 3.5, 3.6, 4.],
         resolution=1e-5,  # resolution of the timestamps, i.e., smallest possible difference between timestamps
-        label_keys=[0, 1, 2, 3, 5, 0, 1, 2, 4],
+        data=[0, 1, 2, 3, 5, 0, 1, 2, 4],
         labels=['trial_start', 'cue_onset', 'cue_offset', 'response_left', 'response_right', 'reward']
     )
 

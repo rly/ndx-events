@@ -26,9 +26,9 @@ class LabeledEventsMap(EventsMap):
 
     def __init__(self, spec):
         super().__init__(spec)
-        # map object attribute LabeledEvents.labels -> spec LabeledEvents/label_keys.labels
-        label_keys_spec = self.spec.get_dataset('label_keys')
-        self.map_spec('labels', label_keys_spec.get_attribute('labels'))
+        # map object attribute LabeledEvents.labels -> spec LabeledEvents/data.labels
+        data_spec = self.spec.get_dataset('data')
+        self.map_spec('labels', data_spec.get_attribute('labels'))
 
 
 @register_map(AnnotatedEventsTable)

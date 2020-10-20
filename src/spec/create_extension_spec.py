@@ -65,17 +65,17 @@ def main():
         dims=['num_labels'],
         shape=[None],
         doc=("Mapping from an unsigned integer (the zero-based index) to a string, used to understand the "
-             "values in the 'label_keys' dataset. Use an empty string to represent a label value that is not "
+             "values in the 'data' dataset. Use an empty string to represent a label value that is not "
              "mapped to any text."),
     )
 
-    label_keys = NWBDatasetSpec(
-        name='label_keys',
+    data = NWBDatasetSpec(
+        name='data',
         dtype='uint8',
         dims=['num_events'],
         shape=[None],
-        doc=("Integer labels that map onto strings using the mapping in the 'labels' array attribute. This dataset "
-             "should have the same number of elements as the 'timestamps' dataset."),
+        doc=("Unsigned integer labels that map onto strings using the mapping in the 'labels' array attribute. This "
+             "dataset should have the same number of elements as the 'timestamps' dataset."),
         attributes=[labels],
     )
 
@@ -84,24 +84,24 @@ def main():
         neurodata_type_inc='Events',
         doc=("A list of timestamps, stored in seconds, of an event that can have different labels. For example, "
              "this type could represent the times that reward was given, as well as which of three different "
-             "types of reward was given. In this case, the 'label_keys' dataset would contain values {0, 1, 2}, "
+             "types of reward was given. In this case, the 'data' dataset would contain values {0, 1, 2}, "
              "its 'labels' attribute would contain three text elements, where the first (index 0) specifies the "
-             "name of the reward associated with label_keys = 0, the second (index 1) specifies the name of the "
-             "reward associated with label_keys = 1, etc. The labels do not have to start at 0 and do not need to "
-             "be continuous, e.g. the 'label_keys' dataset could contain values {0, 10, 100}, and the 'labels' "
+             "name of the reward associated with data = 0, the second (index 1) specifies the name of the "
+             "reward associated with data = 1, etc. The labels do not have to start at 0 and do not need to "
+             "be continuous, e.g. the 'data' dataset could contain values {0, 10, 100}, and the 'labels' "
              "attribute could contain 101 values, where labels[0] is 'No reward', labels[10] is '10% reward', "
              "labels[100] is 'Full reward', and all other entries in 'labels' are the empty string."),
-        datasets=[label_keys],
+        datasets=[data],
     )
 
     ttls = NWBGroupSpec(
         neurodata_type_def='TTLs',
         neurodata_type_inc='LabeledEvents',
-        doc=("Data type to hold timestamps of TTL pulses. The 'label_keys' dataset contains the integer pulse values, "
-             "and the 'labels' dataset contains user-defined labels associated with each pulse value. The value at "
-             "index n of the 'labels' dataset corresponds to a pulse value of n. For example, the first value (index "
-             "0) of the 'labels' dataset corresponds to a pulse value of 0. See the LabeledEvents type for more "
-             "details."),
+        doc=("Data type to hold timestamps of TTL pulses. The 'data' dataset contains the integer pulse values "
+             "(or channel IDs), and the 'labels' dataset contains user-defined labels associated with each pulse "
+             "value (or channel ID). The value at index i of the 'labels' dataset corresponds to a pulse value (or "
+             "channel ID) of i in the 'data' dataset. For example, the first value (index 0) of the 'labels' dataset "
+             "corresponds to a pulse value of 0. See the LabeledEvents type for more details."),
     )
 
     event_times_index = NWBDatasetSpec(
