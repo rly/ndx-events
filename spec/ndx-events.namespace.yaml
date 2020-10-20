@@ -13,4 +13,4 @@ namespaces:
     - VectorData
     - VectorIndex
   - source: ndx-events.extensions.yaml
-  version: 0.1.0
+  version: 0.2.0

@@ -11,7 +11,7 @@ def main():
     ns_builder = NWBNamespaceBuilder(
         doc="""NWB extension to store event and TTL pulse data""",
         name="""ndx-events""",
-        version="""0.1.0""",
+        version="""0.2.0""",
         author=list(map(str.strip, """Ryan Ly""".split(','))),
         contact=list(map(str.strip, """rly@lbl.gov""".split(',')))
     )
