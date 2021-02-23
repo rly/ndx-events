@@ -24,6 +24,7 @@ def test_example_usage():
     nwb.add_acquisition(events)
 
     # create a new AnnotatedEventsTable type to hold annotated events
+    # each row of the table represents a single event type
     annotated_events = AnnotatedEventsTable(
         name='AnnotatedEventsTable',
         description='annotated events from my experiment',
@@ -43,6 +44,8 @@ def test_example_usage():
         bad_event=[False, False, True],
         id=3
     )
+    # convert the AnnotatedEventsTable to a pandas.DataFrame and print it
+    print(annotated_events.to_dataframe())
 
     # create a processing module in the NWB file to hold processed events data
     events_module = nwb.create_processing_module(
@@ -62,3 +65,8 @@ def test_example_usage():
     with NWBHDF5IO(filename, 'r', load_namespaces=True) as io:
         nwb = io.read()
         print(nwb)
+        # access the LabeledEvents container by name from the NWBFile acquisition group and print it
+        print(nwb.acquisition['LabeledEvents'])
+        # access the AnnotatedEventsTable by name from the 'events' processing module, convert it to
+        # a pandas.DataFrame, and print that
+        print(nwb.processing['events']['AnnotatedEventsTable'].to_dataframe())
