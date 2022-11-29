@@ -25,13 +25,16 @@ background, and alternative approaches to this extension can be found here:
 https://docs.google.com/document/d/1qcsjyFVX9oI_746RdMoDdmQPu940s0YtDjb1en1Xtdw
 
 ## Installation
-
+Python:  
 ```
 pip install ndx-events
 ```
-
+Matlab:  
+```
+generateExtension('<directory path>\ndx-events\spec\ndx-events.namespace.yaml');
+```
 ## Example usage
-
+Python:  
 ```python
 from datetime import datetime
 
@@ -106,5 +109,35 @@ with NWBHDF5IO(filename, 'r', load_namespaces=True) as io:
     # a pandas.DataFrame, and print that
     print(nwb.processing['events']['AnnotatedEventsTable'].to_dataframe())
 ```
+Matlab (see discussion [here](https://github.com/NeurodataWithoutBorders/helpdesk/discussions/27#discussioncomment-2612231)):
+```matlab
+bad_event_col = types.hdmf_common.VectorData( ...
+	  'description', 'whether each event time should be excluded', ...
+	  'data', [false, false, true, false, true] ...
+);
+bad_event_col_index = types.hdmf_common.VectorIndex( ...
+	  'description', 'bad_event column index', ...
+	  'target', types.untyped.ObjectView(bad_event_col), ...
+	  'data', [3; 5] ...
+);
+annotated_events = types.ndx_events.AnnotatedEventsTable( ...
+	  'description', 'annotated events from my experiment', ...
+	  'colnames', {'bad_event'}, ...
+	  'bad_event', bad_event_col, ...
+	  'bad_event_index', bad_event_col_index, ...
+	  'id', types.hdmf_common.ElementIdentifiers('data', [0; 1]) ...  % 0-indexed, for compatibility with Python
+);
 
+% place the annotated events table in a "behavior" processing module in the NWB file
+behavior_mod = types.core.ProcessingModule('description', 'processed behavioral data');
+behavior_mod.dynamictable.set('AnnotatedEvents', annotated_events);
+
+nwb = NwbFile( ...
+	  'session_description', 'mouse in open exploration', ...
+	  'identifier', 'Mouse5_Day3', ...
+	  'session_start_time', datetime(2018, 4, 25, 2, 30, 3) ...
+);
+
+nwb.processing.set('behavior', behavior_mod);
+```
 This extension was created using [ndx-template](https://github.com/nwb-extensions/ndx-template).
