@@ -31,7 +31,7 @@ pip install ndx-events
 ```
 Matlab:  
 ```
-generateExtension('<directory path>\ndx-events\spec\ndx-events.namespace.yaml');
+generateExtension('<directory path>/ndx-events/spec/ndx-events.namespace.yaml');
 ```
 ## Example usage
 Python:  
