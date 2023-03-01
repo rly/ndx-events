@@ -22,4 +22,4 @@ if not os.path.exists(ndx_events_specpath):
 load_namespaces(ndx_events_specpath)
 
 from . import io as __io  # noqa: E402,F401
-from .events import Events, LabeledEvents, TTLs, AnnotatedEventsTable  # noqa: E402,F401
+from .events import Events, EventTypesTable, LabeledEvents  #, TTLs, AnnotatedEventsTable  # noqa: E402,F401
