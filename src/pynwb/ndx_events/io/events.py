@@ -1,12 +1,12 @@
 from pynwb import register_map
 from pynwb.io.core import NWBContainerMapper
-from hdmf.common.io.table import DynamicTableMap
-from hdmf.build import ObjectMapper, BuildManager
-from hdmf.common import VectorData
-from hdmf.utils import getargs, docval
-from hdmf.spec import AttributeSpec
+# from hdmf.common.io.table import DynamicTableMap
+# from hdmf.build import ObjectMapper, BuildManager
+# from hdmf.common import VectorData
+# from hdmf.utils import getargs, docval
+# from hdmf.spec import AttributeSpec
 
-from ..events import Events, LabeledEvents  #, AnnotatedEventsTable
+from ..events import Events
 
 
 @register_map(Events)

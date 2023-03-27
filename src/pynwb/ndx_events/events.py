@@ -6,6 +6,7 @@ from hdmf.utils import docval, getargs, popargs, get_docval
 
 
 EventTypesTable = get_class('EventTypesTable', 'ndx-events')
+EventsTable = get_class('EventsTable', 'ndx-events')
 # TTLTypesTable = get_class('TTLTypesTable', 'ndx-events')
 
 @register_class('Events', 'ndx-events')
@@ -38,70 +39,70 @@ class Events(NWBDataInterface):
         self.fields['unit'] = 'seconds'
 
 
-@register_class('LabeledEvents', 'ndx-events')
-class LabeledEvents(Events):
-    """
-    A list of timestamps, stored in seconds, of an event that can have different
-    labels. For example, this type could represent the times that reward was given,
-    as well as which of three different types of reward was given. In this case, the
-    'data' dataset would contain values {0, 1, 2}, and the 'labels' dataset
-    would contain three text elements, where the first (index 0) specifies the name
-    of the reward associated with data = 0, the second (index 1) specifies
-    the name of the reward associated with data = 1, etc. The labels do not
-    have to start at 0 and do not need to be sequential, e.g. the 'data' dataset
-    could contain values {0, 10, 100}, and the 'labels' dataset could contain 101
-    values, where labels[0] is 'No reward', labels[10] is '10% reward', labels[100]
-    is 'Full reward', and all other entries in 'labels' are the empty string.
-    """
+# @register_class('LabeledEvents', 'ndx-events')
+# class LabeledEvents(Events):
+#     """
+#     A list of timestamps, stored in seconds, of an event that can have different
+#     labels. For example, this type could represent the times that reward was given,
+#     as well as which of three different types of reward was given. In this case, the
+#     'data' dataset would contain values {0, 1, 2}, and the 'labels' dataset
+#     would contain three text elements, where the first (index 0) specifies the name
+#     of the reward associated with data = 0, the second (index 1) specifies
+#     the name of the reward associated with data = 1, etc. The labels do not
+#     have to start at 0 and do not need to be sequential, e.g. the 'data' dataset
+#     could contain values {0, 10, 100}, and the 'labels' dataset could contain 101
+#     values, where labels[0] is 'No reward', labels[10] is '10% reward', labels[100]
+#     is 'Full reward', and all other entries in 'labels' are the empty string.
+#     """
 
-    __nwbfields__ = ('data',
-                     'labels')
+#     __nwbfields__ = ('data',
+#                      'labels')
 
-    @docval(*get_docval(Events.__init__, 'name', 'description', 'timestamps'),  # required
-            {'name': 'data', 'type': ('array_data', 'data'),  # required
-             'doc': ("Unsigned integer labels that map onto strings using the mapping in the 'labels' dataset. "
-                     "Values must be 0 or greater and need not be sequential. If a list/tuple/array of integer values "
-                     "is passed, it will be converted to a numpy array of unsigned integer values. This dataset should "
-                     "have the same number of elements as the 'timestamps' dataset."),
-             'shape': (None,)},
-            {'name': 'event_types', 'type': EventTypesTable,
-             'doc': ("Mapping from an integer (the zero-based index) to a string, used to understand "
-                     "the integer values in the 'data' dataset. Use an empty string to represent "
-                     "a label value that is not mapped to any text. Use '' to represent any values "
-                     "that are None or empty. If the argument is not specified, the label "
-                     "will be set to the string representation of the data value and '' for other values.")},
-            *get_docval(Events.__init__, 'resolution'))
-    def __init__(self, **kwargs):
-        timestamps = getargs('timestamps', kwargs)
-        data, event_types = popargs('data', 'event_types', kwargs)
-        super().__init__(**kwargs)
-        if len(timestamps) != len(data):
-            raise ValueError('Timestamps and data must have the same length: %d != %d'
-                             % (len(timestamps), len(data)))
-        data = self.__check_label_indices_uint(data)
-        self.data = data
-        self.event_types = event_types
+#     @docval(*get_docval(Events.__init__, 'name', 'description', 'timestamps'),  # required
+#             {'name': 'data', 'type': ('array_data', 'data'),  # required
+#              'doc': ("Unsigned integer labels that map onto strings using the mapping in the 'labels' dataset. "
+#                      "Values must be 0 or greater and need not be sequential. If a list/tuple/array of integer values "
+#                      "is passed, it will be converted to a numpy array of unsigned integer values. This dataset should "
+#                      "have the same number of elements as the 'timestamps' dataset."),
+#              'shape': (None,)},
+#             {'name': 'event_types', 'type': EventTypesTable,
+#              'doc': ("Mapping from an integer (the zero-based index) to a string, used to understand "
+#                      "the integer values in the 'data' dataset. Use an empty string to represent "
+#                      "a label value that is not mapped to any text. Use '' to represent any values "
+#                      "that are None or empty. If the argument is not specified, the label "
+#                      "will be set to the string representation of the data value and '' for other values.")},
+#             *get_docval(Events.__init__, 'resolution'))
+#     def __init__(self, **kwargs):
+#         timestamps = getargs('timestamps', kwargs)
+#         data, event_types = popargs('data', 'event_types', kwargs)
+#         super().__init__(**kwargs)
+#         if len(timestamps) != len(data):
+#             raise ValueError('Timestamps and data must have the same length: %d != %d'
+#                              % (len(timestamps), len(data)))
+#         data = self.__check_label_indices_uint(data)
+#         self.data = data
+#         self.event_types = event_types
 
-    def __check_label_indices_uint(self, data):
-        """Convert a list/tuple of integer label indices to a numpy array of unsigned integers. Raise error if negative
-        or non-numeric values are found. If something other than a list/tuple/np.ndarray of ints or unsigned ints
-        is provided, return the original array.
-        """
-        new_data = data
-        if isinstance(new_data, (list, tuple)):
-            new_data = np.array(new_data)
-        if isinstance(new_data, np.ndarray):
-            if not np.issubdtype(new_data.dtype, np.number):
-                raise ValueError("'data' must be an array of numeric values that have type unsigned int or "
-                                 "can be converted to unsigned int, not type %s" % new_data.dtype)
-            if np.issubdtype(new_data.dtype, np.unsignedinteger):
-                return new_data
-            if (new_data < 0).any():
-                raise ValueError("Negative values are not allowed in 'data'.")
-            if np.issubdtype(new_data.dtype, np.integer):
-                return new_data.astype(np.uint)
-            # all other array dtypes will not be handled. the objectmapper will attempt to convert the data
-        return data
+#     def __check_label_indices_uint(self, data):
+#         """Convert a list/tuple of integer label indices to a numpy array of unsigned integers. Raise error if negative
+#         or non-numeric values are found. If something other than a list/tuple/np.ndarray of ints or unsigned ints
+#         is provided, return the original array.
+#         """
+#         new_data = data
+#         if isinstance(new_data, (list, tuple)):
+#             new_data = np.array(new_data)
+#         if isinstance(new_data, np.ndarray):
+#             if not np.issubdtype(new_data.dtype, np.number):
+#                 raise ValueError("'data' must be an array of numeric values that have type unsigned int or "
+#                                  "can be converted to unsigned int, not type %s" % new_data.dtype)
+#             if np.issubdtype(new_data.dtype, np.unsignedinteger):
+#                 return new_data
+#             if (new_data < 0).any():
+#                 raise ValueError("Negative values are not allowed in 'data'.")
+#             if np.issubdtype(new_data.dtype, np.integer):
+#                 return new_data.astype(np.uint)
+#             # all other array dtypes will not be handled. the objectmapper will attempt to convert the data
+#         return data
 
 
 # @register_class('TTLs', 'ndx-events')
