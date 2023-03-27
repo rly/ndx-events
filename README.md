@@ -2,6 +2,8 @@
 
 This is an NWB extension for storing timestamped event data and TTL pulses.
 
+The latest version is 0.3.0. This is a major change from previous versions.
+
 Events can be:
 1. **Simple events**. These are stored in the `Events` type. The `Events` type consists of only a name, a description,
 and a 1D array of timestamps. This should be used instead of a `TimeSeries` when the time series has no data.
@@ -25,119 +27,107 @@ background, and alternative approaches to this extension can be found here:
 https://docs.google.com/document/d/1qcsjyFVX9oI_746RdMoDdmQPu940s0YtDjb1en1Xtdw
 
 ## Installation
-Python:  
+Python:
+```bash
+pip install -U ndx-events
 ```
-pip install ndx-events
-```
-Matlab:  
-```
+
+Matlab:
+```matlab
 generateExtension('<directory path>/ndx-events/spec/ndx-events.namespace.yaml');
 ```
+
 ## Example usage
-Python:  
+Python:
+
 ```python
 from datetime import datetime
-
+from ndx_events import Events, EventsTable, EventTypesTable
 from pynwb import NWBFile, NWBHDF5IO
-from ndx_events import LabeledEvents, AnnotatedEventsTable
-
 
 nwb = NWBFile(
-    session_description='session description',
-    identifier='cool_experiment_001',
-    session_start_time=datetime.now().astimezone()
+    session_description="session description",
+    identifier="cool_experiment_001",
+    session_start_time=datetime.now().astimezone(),
 )
 
-# create a new LabeledEvents type to hold events recorded from the data acquisition system
-events = LabeledEvents(
-    name='LabeledEvents',
-    description='events from my experiment',
-    timestamps=[0., 0.5, 0.6, 2., 2.05, 3., 3.5, 3.6, 4.],
-    resolution=1e-5,  # resolution of the timestamps, i.e., smallest possible difference between timestamps
-    data=[0, 1, 2, 3, 5, 0, 1, 2, 4],
-    labels=['trial_start', 'cue_onset', 'cue_offset', 'response_left', 'response_right', 'reward']
+# create a basic events object
+basic_tone_event = Events(
+    name="tone_onset",
+    timestamps=[0.0, 0.1, 0.3, 0.5, 0.6],
+    description="Times when a tone was played.",
 )
 
-# add the LabeledEvents type to the acquisition group of the NWB file
-nwb.add_acquisition(events)
+# add the basic events object to the NWBFile object
+nwb.add_acquisition(basic_tone_event)
 
-# create a new AnnotatedEventsTable type to hold annotated events
-# each row of the table represents a single event type
-annotated_events = AnnotatedEventsTable(
-    name='AnnotatedEventsTable',
-    description='annotated events from my experiment',
-    resolution=1e-5  # resolution of the timestamps, i.e., smallest possible difference between timestamps
-)
-# add a custom indexed (ragged) column to represent whether each event time was a bad event
-annotated_events.add_column(
-    name='bad_event',
-    description='whether each event time should be excluded',
-    index=True
-)
-# add an event type (row) to the AnnotatedEventsTable instance
-annotated_events.add_event_type(
-    label='Reward',
-    event_description='Times when the subject received juice reward.',
-    event_times=[1., 2., 3.],
-    bad_event=[False, False, True],
-    id=3
-)
-# convert the AnnotatedEventsTable to a pandas.DataFrame and print it
-print(annotated_events.to_dataframe())
-
-# create a processing module in the NWB file to hold processed events data
-events_module = nwb.create_processing_module(
-    name='events',
-    description='processed event data'
+# create an event types table
+event_types_table = EventTypesTable(
+    name="EventTypesTable",
+    description="metadata about event types",
 )
 
-# add the AnnotatedEventsTable instance to the processing module
-events_module.add(annotated_events)
+# create a new custom column with additional metadata
+event_types_table.add_column(
+    name="extra_metadata",
+    description="some additional metadata about each event type",
+)
+
+# add event types one by one
+event_types_table.add_row(
+    id=0, event_name="trial start", extra_metadata="more metadata"
+)
+event_types_table.add_row(
+    id=1, event_name="cue onset", extra_metadata="more metadata"
+)
+event_types_table.add_row(
+    id=2, event_name="cue offset", extra_metadata="more metadata"
+)
+event_types_table.add_row(
+    id=3, event_name="nosepoke left", extra_metadata="more metadata"
+)
+event_types_table.add_row(
+    id=4, event_name="nosepoke right", extra_metadata="more metadata"
+)
+event_types_table.add_row(id=5, event_name="reward", extra_metadata="more metadata")
+
+# add the event types table to the acquisition group for now
+# it should be added to the /general/tasks group when merged with core
+nwb.add_acquisition(event_types_table)
+
+# create a new EventsTable type to hold events recorded from the data acquisition system
+events_table = EventsTable(
+    name="EventsTable",
+    description="events from my experiment",
+)
+# set the dynamic table region link
+events_table["event_type"].table = event_types_table
+
+# add events one by one
+events_table.add_row(timestamp=0.1, event_type=0, duration=0.0)
+events_table.add_row(timestamp=0.3, event_type=1, duration=0.0)
+events_table.add_row(timestamp=0.4, event_type=2, duration=0.0)
+events_table.add_row(timestamp=0.8, event_type=4, duration=0.1)
+events_table.add_row(timestamp=0.85, event_type=5, duration=0.0)
+
+# add the EventsTable type to the acquisition group of the NWB file
+nwb.add_acquisition(events_table)
 
 # write nwb file
-filename = 'test.nwb'
-with NWBHDF5IO(filename, 'w') as io:
+filename = "test.nwb"
+with NWBHDF5IO(filename, "w") as io:
     io.write(nwb)
 
 # read nwb file and check its contents
-with NWBHDF5IO(filename, 'r', load_namespaces=True) as io:
+with NWBHDF5IO(filename, "r", load_namespaces=True) as io:
     nwb = io.read()
     print(nwb)
-    # access the LabeledEvents container by name from the NWBFile acquisition group and print it
-    print(nwb.acquisition['LabeledEvents'])
-    # access the AnnotatedEventsTable by name from the 'events' processing module, convert it to
-    # a pandas.DataFrame, and print that
-    print(nwb.processing['events']['AnnotatedEventsTable'].to_dataframe())
+    # access the events table and event types table by name from the NWBFile acquisition group and print it
+    print(nwb.acquisition["tone_onset"])
+    print(nwb.acquisition["EventTypesTable"])
+    print(nwb.acquisition["EventsTable"])
+    print(nwb.acquisition["EventsTable"].to_dataframe())
+    print(nwb.acquisition["EventsTable"][0, "event_type"])
 ```
-Matlab (see discussion [here](https://github.com/NeurodataWithoutBorders/helpdesk/discussions/27#discussioncomment-2612231)):
-```matlab
-bad_event_col = types.hdmf_common.VectorData( ...
-	  'description', 'whether each event time should be excluded', ...
-	  'data', [false, false, true, false, true] ...
-);
-bad_event_col_index = types.hdmf_common.VectorIndex( ...
-	  'description', 'bad_event column index', ...
-	  'target', types.untyped.ObjectView(bad_event_col), ...
-	  'data', [3; 5] ...
-);
-annotated_events = types.ndx_events.AnnotatedEventsTable( ...
-	  'description', 'annotated events from my experiment', ...
-	  'colnames', {'bad_event'}, ...
-	  'bad_event', bad_event_col, ...
-	  'bad_event_index', bad_event_col_index, ...
-	  'id', types.hdmf_common.ElementIdentifiers('data', [0; 1]) ...  % 0-indexed, for compatibility with Python
-);
 
-% place the annotated events table in a "behavior" processing module in the NWB file
-behavior_mod = types.core.ProcessingModule('description', 'processed behavioral data');
-behavior_mod.dynamictable.set('AnnotatedEvents', annotated_events);
-
-nwb = NwbFile( ...
-	  'session_description', 'mouse in open exploration', ...
-	  'identifier', 'Mouse5_Day3', ...
-	  'session_start_time', datetime(2018, 4, 25, 2, 30, 3) ...
-);
-
-nwb.processing.set('behavior', behavior_mod);
-```
 This extension was created using [ndx-template](https://github.com/nwb-extensions/ndx-template).
