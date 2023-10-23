@@ -7,11 +7,5 @@ namespaces:
   name: ndx-events
   schema:
   - namespace: core
-    neurodata_types:
-    - NWBDataInterface
-    - DynamicTable
-    - VectorData
-    - VectorIndex
-    - DynamicTableRegion
   - source: ndx-events.extensions.yaml
   version: 0.3.0

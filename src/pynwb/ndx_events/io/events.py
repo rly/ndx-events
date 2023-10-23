@@ -6,19 +6,19 @@ from pynwb.io.core import NWBContainerMapper
 # from hdmf.utils import getargs, docval
 # from hdmf.spec import AttributeSpec
 
-from ..events import Events
+# from ..events import Events
 
 
-@register_map(Events)
-class EventsMap(NWBContainerMapper):
+# @register_map(Events)
+# class EventsMap(NWBContainerMapper):
 
-    def __init__(self, spec):
-        super().__init__(spec)
-        # map object attribute Events.unit -> spec Events/timestamps.unit
-        # map object attribute Events.resolution -> spec Events/timestamps.resolution
-        timestamps_spec = self.spec.get_dataset('timestamps')
-        self.map_spec('unit', timestamps_spec.get_attribute('unit'))
-        self.map_spec('resolution', timestamps_spec.get_attribute('resolution'))
+#     def __init__(self, spec):
+#         super().__init__(spec)
+#         # map object attribute Events.unit -> spec Events/timestamps.unit
+#         # map object attribute Events.resolution -> spec Events/timestamps.resolution
+#         timestamps_spec = self.spec.get_dataset('timestamps')
+#         self.map_spec('unit', timestamps_spec.get_attribute('unit'))
+#         self.map_spec('resolution', timestamps_spec.get_attribute('resolution'))
 
 
 # @register_map(LabeledEvents)

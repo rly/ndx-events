@@ -1,53 +1,55 @@
 groups:
-- neurodata_type_def: Events
-  neurodata_type_inc: NWBDataInterface
-  doc: A simple list of timestamps, stored in seconds, of an event type. For example,
-    this neurodata type could be used to store all the times that a nosepoke was detected.
-    The name may be set to 'nosepoke_onset'.
+- neurodata_type_def: EventTypesTable
+  neurodata_type_inc: DynamicTable
+  default_name: EventTypesTable
+  doc: A column-based table to store information about each event type, such as name,
+    one event type per row.
   attributes:
   - name: description
     dtype: text
-    doc: Description of the event type.
-  datasets:
-  - name: timestamps
-    dtype: float32
-    dims:
-    - num_events
-    shape:
-    - null
-    doc: Event timestamps, in seconds, relative to the common experiment master-clock
-      stored in NWBFile.timestamps_reference_time.
-    attributes:
-    - name: unit
-      dtype: text
-      value: seconds
-      doc: Unit of measurement for timestamps, which is fixed to 'seconds'.
-    - name: resolution
-      dtype: float32
-      doc: The smallest possible difference between two event times. Usually 1 divided
-        by the event time sampling rate on the data acquisition system.
-      required: false
-- neurodata_type_def: EventTypesTable
-  neurodata_type_inc: DynamicTable
-  doc: A column-based table to store information about each event type, such as name,
-    one event type per row.
+    default_value: Metadata about event types.
+    doc: Description of the event types table.
+    required: false
   datasets:
   - name: event_name
     neurodata_type_inc: VectorData
     dtype: text
     doc: Name of each event type.
-  - name: hed
+  - name: event_type_description
     neurodata_type_inc: VectorData
     dtype: text
+    doc: Description of each event type.
+  - name: hed_tags
+    neurodata_type_inc: VectorData
+    dtype: text
+    dims:
+    - num_tags
+    shape:
+    - null
+    doc: Optional column containing the Hierarchical Event Descriptor (HED) tags for
+      each event type.
+    quantity: '?'
+  - name: hed_tags_index
+    neurodata_type_inc: VectorIndex
     dims:
     - num_events
     shape:
     - null
-    doc: Optional column containing the Hierarchical Event Descriptor of each event.
+    doc: Index column for `hed_tags` column.
     quantity: '?'
 - neurodata_type_def: EventsTable
   neurodata_type_inc: DynamicTable
-  doc: A column-based table to store information about events, one event per row.
+  default_name: EventsTable
+  doc: A column-based table to store information about events (event instances), one
+    event per row. Each event must have an event_type, which is a row in the EventTypesTable.
+    Additional columns may be added to store metadata about each event, such as the
+    duration of the event, or a text value of the event.
+  attributes:
+  - name: description
+    dtype: text
+    default_value: Metadata about events.
+    doc: Description of the events table.
+    required: false
   datasets:
   - name: timestamp
     neurodata_type_inc: VectorData
@@ -56,7 +58,7 @@ groups:
     - num_events
     shape:
     - null
-    doc: The time that the event occurred, in seconds.
+    doc: The time that the event occurred, in seconds, from the session start time.
     attributes:
     - name: unit
       dtype: text
@@ -93,17 +95,38 @@ groups:
     - null
     doc: Optional column containing the duration of each event, in seconds.
     quantity: '?'
+  - name: hed_tags
+    neurodata_type_inc: VectorData
+    dtype: text
+    dims:
+    - num_tags
+    shape:
+    - null
+    doc: Optional column containing the Hierarchical Event Descriptor (HED) tags for
+      each event. HED tags should be used at the event type level, not at the event
+      instance level, when possible, unless it is important to annotate events individually.
+    quantity: '?'
+  - name: hed_tags_index
+    neurodata_type_inc: VectorIndex
+    dims:
+    - num_events
+    shape:
+    - null
+    doc: Index column for `hed_tags` column.
+    quantity: '?'
 - neurodata_type_def: TtlTypesTable
   neurodata_type_inc: EventTypesTable
+  default_name: TtlTypesTable
   doc: A column-based table to store information about each TTL type, such as name
     and pulse value, one TTL type per row.
   datasets:
   - name: pulse_value
     neurodata_type_inc: VectorData
-    dtype: int8
+    dtype: uint8
     doc: TTL pulse value for each event type.
 - neurodata_type_def: TtlsTable
   neurodata_type_inc: EventsTable
+  default_name: TtlsTable
   doc: Data type to hold timestamps of TTL pulses.
   datasets:
   - name: event_type
