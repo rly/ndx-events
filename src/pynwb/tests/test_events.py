@@ -4,17 +4,24 @@ from pynwb import NWBHDF5IO
 from pynwb.testing import TestCase, remove_test_file
 from pynwb.testing.mock.file import mock_NWBFile
 
-from ndx_events import EventsTable, EventTypesTable, TtlsTable, TtlTypesTable, Task, DurationVectorData, TimestampVectorData
+from ndx_events import (
+    EventsTable,
+    EventTypesTable,
+    TtlsTable,
+    TtlTypesTable,
+    Task,
+    DurationVectorData,
+    TimestampVectorData,
+)
 
 
 class TestTimestampVectorData(TestCase):
-
     def test_init(self):
         data = TimestampVectorData(name="test", description="description")
         assert data.name == "test"
         assert data.description == "description"
         assert data.unit == "seconds"
-        assert data.resolution == None
+        assert data.resolution is None
 
     def test_add_to_dynamic_table(self):
         col = TimestampVectorData(name="test", description="description")
@@ -24,13 +31,13 @@ class TestTimestampVectorData(TestCase):
         assert table.test[0] == 0.1
 
     def test_set_resolution_init(self):
-        data = TimestampVectorData(name="test", description="description", resolution=1/32000.0)
-        assert data.resolution == 1/32000.0
+        data = TimestampVectorData(name="test", description="description", resolution=1 / 32000.0)
+        assert data.resolution == 1 / 32000.0
 
     def test_set_resolution_attr(self):
         data = TimestampVectorData(name="test", description="description")
-        data.resolution = 1/32000.0
-        assert data.resolution == 1/32000.0
+        data.resolution = 1 / 32000.0
+        assert data.resolution == 1 / 32000.0
 
 
 class TestTimestampVectorDataSimpleRoundtrip(TestCase):
@@ -68,7 +75,6 @@ class TestTimestampVectorDataSimpleRoundtrip(TestCase):
 
 
 class TestDurationVectorData(TestCase):
-
     def test_init(self):
         data = DurationVectorData(name="test", description="description")
         assert data.name == "test"
@@ -118,7 +124,6 @@ class TestDurationVectorDataSimpleRoundtrip(TestCase):
 
 
 class TestTask(TestCase):
-
     def test_init(self):
         task = Task()
         assert task.name == "task"
@@ -159,7 +164,6 @@ class TestTaskSimpleRoundtrip(TestCase):
 
 
 class TestEventTypesTable(TestCase):
-
     def test_init(self):
         event_types_table = EventTypesTable(description="Metadata about event types")
         assert event_types_table.name == "EventTypesTable"
@@ -227,7 +231,8 @@ class TestEventTypesTableSimpleRoundtrip(TestCase):
             assert read_event_types_table.description == "Metadata about event types"
             assert all(read_event_types_table["event_name"].data[:] == ["cue on", "stimulus on"])
             assert all(
-                read_event_types_table["event_type_description"].data[:] == [
+                read_event_types_table["event_type_description"].data[:]
+                == [
                     "Times when the cue was on screen.",
                     "Times when the stimulus was on screen.",
                 ]
@@ -235,7 +240,6 @@ class TestEventTypesTableSimpleRoundtrip(TestCase):
 
 
 class TestEventsTable(TestCase):
-
     def test_init(self):
         events_table = EventsTable(description="Metadata about events")
         assert events_table.name == "EventsTable"
@@ -396,7 +400,6 @@ class TestEventsTableSimpleRoundtrip(TestCase):
 
 
 class TestTtlTypesTable(TestCase):
-
     def test_init(self):
         ttl_types_table = TtlTypesTable(description="Metadata about TTL types")
         assert ttl_types_table.name == "TtlTypesTable"
@@ -469,7 +472,8 @@ class TestTtlTypesTableSimpleRoundtrip(TestCase):
             assert read_ttl_types_table.description == "Metadata about TTL types"
             assert all(read_ttl_types_table["event_name"].data[:] == ["cue on", "stimulus on"])
             assert all(
-                read_ttl_types_table["event_type_description"].data[:] == [
+                read_ttl_types_table["event_type_description"].data[:]
+                == [
                     "Times when the cue was on screen.",
                     "Times when the stimulus was on screen.",
                 ]
@@ -478,7 +482,6 @@ class TestTtlTypesTableSimpleRoundtrip(TestCase):
 
 
 class TestTtlsTable(TestCase):
-
     def test_init(self):
         ttls_table = TtlsTable(description="Metadata about TTLs")
         assert ttls_table.name == "TtlsTable"

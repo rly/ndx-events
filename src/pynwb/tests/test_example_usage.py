@@ -123,7 +123,7 @@ def test_example_usage():
         timestamp=6825.934244,
         ttl_type=6,
     )
-    ttls_table.timestamp.resolution = 1/50000.0  # specify the resolution of the timestamps (optional)
+    ttls_table.timestamp.resolution = 1 / 50000.0  # specify the resolution of the timestamps (optional)
 
     # if TTLs are recorded, then the events table should hold any non-TTL events
     # recorded by the acquisition system
@@ -143,8 +143,7 @@ def test_example_usage():
     events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
     events_table.add_column(name="category_name", description="Name of the category of the stimulus")
     events_table.add_column(
-        name="stimulus_image_index",
-        description="Frame index of the stimulus image in the StimulusPresentation object"
+        name="stimulus_image_index", description="Frame index of the stimulus image in the StimulusPresentation object"
     )
     events_table.add_row(
         timestamp=6821.208244,
@@ -160,8 +159,8 @@ def test_example_usage():
         event_type=0,
         duration=0.99484,
     )
-    events_table.timestamp.resolution = 1/50000.0  # specify the resolution of the timestamps (optional)
-    events_table.duration.resolution = 1/50000.0  # specify the resolution of the durations (optional)
+    events_table.timestamp.resolution = 1 / 50000.0  # specify the resolution of the timestamps (optional)
+    events_table.duration.resolution = 1 / 50000.0  # specify the resolution of the durations (optional)
 
     task = Task()
     task.event_types = event_types_table

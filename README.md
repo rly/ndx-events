@@ -22,8 +22,8 @@ subtype of `DynamicTable`, where each row corresponds to a different event type.
 Unlike for the other event types, users can add their own custom columns to annotate each event type or event time.
 This can be useful for storing event metadata related to data preprocessing and analysis, such as marking bad events.
 
-This extension was developed by Ryan Ly, Ben Dichter, Oliver Rübel, and Andrew Tritt. Information about the rationale,
-background, and alternative approaches to this extension can be found here:
+This extension was developed by Ryan Ly, Oliver Rübel, and the NWB Technical Advisory Board.
+Information about the rationale, background, and alternative approaches to this extension can be found here:
 https://docs.google.com/document/d/1qcsjyFVX9oI_746RdMoDdmQPu940s0YtDjb1en1Xtdw
 
 ## Installation
