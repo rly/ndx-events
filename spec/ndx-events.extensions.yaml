@@ -116,3 +116,7 @@ groups:
     neurodata_type_inc: EventTypesTable
     doc: Table to store information about each task event type.
     quantity: '?'
+  - name: ttl_types
+    neurodata_type_inc: TtlTypesTable
+    doc: Table to store information about each task TTL type.
+    quantity: '?'

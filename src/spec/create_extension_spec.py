@@ -170,10 +170,24 @@ def main():
                 doc="Table to store information about each task event type.",
                 quantity="?",
             ),
+            NWBGroupSpec(
+                name="ttl_types",
+                neurodata_type_inc="TtlTypesTable",
+                doc="Table to store information about each task TTL type.",
+                quantity="?",
+            ),
         ],
     )
 
-    new_data_types = [timestamp_vector_data, duration_vector_data, event_types_table, events_table, ttl_types_table, ttls_table, task, ]
+    new_data_types = [
+        timestamp_vector_data,
+        duration_vector_data,
+        event_types_table,
+        events_table,
+        ttl_types_table,
+        ttls_table,
+        task,
+    ]
 
     # export the spec to yaml files in the spec folder
     output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'spec'))

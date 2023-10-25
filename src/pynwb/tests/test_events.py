@@ -1,9 +1,10 @@
 from hdmf.common import DynamicTable
+import numpy as np
 from pynwb import NWBHDF5IO
 from pynwb.testing import TestCase, remove_test_file
 from pynwb.testing.mock.file import mock_NWBFile
 
-from ndx_events import EventsTable, EventTypesTable, Task, DurationVectorData, TimestampVectorData
+from ndx_events import EventsTable, EventTypesTable, TtlsTable, TtlTypesTable, Task, DurationVectorData, TimestampVectorData
 
 
 class TestTimestampVectorData(TestCase):
@@ -327,7 +328,6 @@ class TestEventsTableSimpleRoundtrip(TestCase):
         nwbfile = mock_NWBFile()
         nwbfile.add_lab_meta_data(task)
         nwbfile.add_acquisition(events_table)
-        breakpoint()
 
         with NWBHDF5IO(self.path, mode="w") as io:
             io.write(nwbfile)
@@ -351,192 +351,212 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             assert read_events_table["event_type"].table is read_event_types_table
 
 
+class TestTtlTypesTable(TestCase):
 
-# class TestEventsTable(TestCase):
+    def test_init(self):
+        ttl_types_table = TtlTypesTable(description="Metadata about TTL types")
+        assert ttl_types_table.name == "TtlTypesTable"
+        assert ttl_types_table.description == "Metadata about TTL types"
 
-#     def test_init(self):
-#         event_types_table = EventTypesTable()
-#         events = EventsTable(
-#             name='EventsTable',
-#             description='events from my experiment',
-#             timestamps=[0., 1., 2.],
-#             resolution=1e-5
-#         )
-#         self.assertEqual(events.name, 'Events')
-#         self.assertEqual(events.description, 'events from my experiment')
-#         self.assertEqual(events.timestamps, [0., 1., 2.])
-#         self.assertEqual(events.resolution, 1e-5)
-#         self.assertEqual(events.unit, 'seconds')
+    def test_init_name(self):
+        ttl_types_table = TtlTypesTable(name="ttl_types", description="Metadata about TTL types")
+        assert ttl_types_table.name == "ttl_types"
+        assert ttl_types_table.description == "Metadata about TTL types"
 
-
-# class TestLabeledEvents(TestCase):
-
-#     def test_init(self):
-#         events = LabeledEvents(
-#             name='LabeledEvents',
-#             description='events from my experiment',
-#             timestamps=[0., 1., 2.],
-#             resolution=1e-5,
-#             data=np.uint([3, 4, 3]),
-#             labels=['', '', '', 'event1', 'event2']
-#         )
-#         self.assertEqual(events.name, 'LabeledEvents')
-#         self.assertEqual(events.description, 'events from my experiment')
-#         self.assertEqual(events.timestamps, [0., 1., 2.])
-#         self.assertEqual(events.resolution, 1e-5)
-#         self.assertEqual(events.unit, 'seconds')
-#         np.testing.assert_array_equal(events.data, np.uint([3, 4, 3])),
-#         self.assertEqual(events.labels, ['', '', '', 'event1', 'event2'])
-
-#     def test_mismatch_length(self):
-#         msg = 'Timestamps and data must have the same length: 3 != 4'
-#         with self.assertRaisesWith(ValueError, msg):
-#             LabeledEvents(
-#                 name='LabeledEvents',
-#                 description='events from my experiment',
-#                 timestamps=[0., 1., 2.],
-#                 resolution=1e-5,
-#                 data=np.uint([3, 4, 3, 5]),
-#                 labels=['', '', '', 'event1', 'event2', 'event3']
-#             )
-
-#     def test_default_labels(self):
-#         events = LabeledEvents(
-#             name='LabeledEvents',
-#             description='events from my experiment',
-#             timestamps=[0., 1., 2.],
-#             resolution=1e-5,
-#             data=np.uint([3, 4, 3]),
-#         )
-#         self.assertEqual(events.labels, ['', '', '', '3', '4'])
-
-#     def test_none_in_labels(self):
-#         msg = "None values are not allowed in the labels array. Please use '' for undefined labels."
-#         with self.assertRaisesWith(ValueError, msg):
-#             LabeledEvents(
-#                 name='LabeledEvents',
-#                 description='events from my experiment',
-#                 timestamps=[0., 1., 2.],
-#                 resolution=1e-5,
-#                 data=np.uint([3, 4, 3]),
-#                 labels=[None, None, None, 'event1', 'event2']
-#             )
-
-#     def test_data_negative(self):
-#         msg = "Negative values are not allowed in 'data'."
-#         with self.assertRaisesWith(ValueError, msg):
-#             LabeledEvents(
-#                 name='LabeledEvents',
-#                 description='events from my experiment',
-#                 timestamps=[0., 1., 2.],
-#                 resolution=1e-5,
-#                 data=[1, -2, 3],
-#                 labels=['', '', '', 'event1', 'event2']
-#             )
-
-#     def test_data_int_conversion(self):
-#         le = LabeledEvents(
-#             name='LabeledEvents',
-#             description='events from my experiment',
-#             timestamps=[0., 1., 2.],
-#             resolution=1e-5,
-#             data=[1, 2, 3],
-#             labels=['', '', '', 'event1', 'event2']
-#         )
-#         np.testing.assert_array_equal(le.data, np.array([1, 2, 3]))
-#         self.assertEqual(le.data.dtype, np.uint)
-
-#     def test_data_string(self):
-#         msg = ("'data' must be an array of numeric values that have type unsigned int or "
-#                "can be converted to unsigned int, not type <U1")
-#         with self.assertRaisesWith(ValueError, msg):
-#             LabeledEvents(
-#                 name='LabeledEvents',
-#                 description='events from my experiment',
-#                 timestamps=[0., 1., 2.],
-#                 resolution=1e-5,
-#                 data=['1', '2', '3'],
-#                 labels=['', '', '', 'event1', 'event2']
-#             )
-
-#     def test_data_pass_through(self):
-#         data = [1.0, 2.0, 3.0]
-#         le = LabeledEvents(
-#             name='LabeledEvents',
-#             description='events from my experiment',
-#             timestamps=[0., 1., 2.],
-#             resolution=1e-5,
-#             data=data,
-#             labels=['', '', '', 'event1', 'event2']
-#         )
-#         self.assertIs(le.data, data)
+    def test_add_row(self):
+        ttl_types_table = TtlTypesTable(description="Metadata about TTL types")
+        ttl_types_table.add_row(
+            event_name="cue on",
+            event_type_description="Times when the cue was on screen.",
+            pulse_value=np.uint(1),
+        )
+        ttl_types_table.add_row(
+            event_name="stimulus on",
+            event_type_description="Times when the stimulus was on screen.",
+            pulse_value=np.uint(2),
+        )
+        assert ttl_types_table["event_name"].data == ["cue on", "stimulus on"]
+        assert ttl_types_table["event_type_description"].data == [
+            "Times when the cue was on screen.",
+            "Times when the stimulus was on screen.",
+        ]
+        assert all(ttl_types_table["pulse_value"].data == np.uint([1, 2]))
 
 
-# class TestTTLs(TestCase):
+class TestTtlTypesTableSimpleRoundtrip(TestCase):
+    """Simple roundtrip test for TtlTypesTable."""
+
+    def setUp(self):
+        self.path = "test.nwb"
+
+    def tearDown(self):
+        remove_test_file(self.path)
+
+    def test_roundtrip(self):
+        """
+        Create an TtlTypesTable, write it to file, read the file, and test that the read table matches the original.
+        """
+        # NOTE that when adding an TtlTypesTable to a Task, the TtlTypesTable
+        # must be named "ttl_types" according to the spec
+        ttl_types_table = TtlTypesTable(name="ttl_types", description="Metadata about TTL types")
+        ttl_types_table.add_row(
+            event_name="cue on",
+            event_type_description="Times when the cue was on screen.",
+            pulse_value=np.uint(1),
+        )
+        ttl_types_table.add_row(
+            event_name="stimulus on",
+            event_type_description="Times when the stimulus was on screen.",
+            pulse_value=np.uint(2),
+        )
+        task = Task()
+        task.ttl_types = ttl_types_table
+        nwbfile = mock_NWBFile()
+        nwbfile.add_lab_meta_data(task)
+
+        with NWBHDF5IO(self.path, mode="w") as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO(self.path, mode="r", load_namespaces=True) as io:
+            read_nwbfile = io.read()
+            read_ttl_types_table = read_nwbfile.get_lab_meta_data("task").ttl_types
+            assert isinstance(read_ttl_types_table, EventTypesTable)
+            assert read_ttl_types_table.name == "ttl_types"
+            assert read_ttl_types_table.description == "Metadata about TTL types"
+            assert all(read_ttl_types_table["event_name"].data[:] == ["cue on", "stimulus on"])
+            assert all(
+                read_ttl_types_table["event_type_description"].data[:] == [
+                    "Times when the cue was on screen.",
+                    "Times when the stimulus was on screen.",
+                ]
+            )
+            assert all(read_ttl_types_table["pulse_value"].data[:] == np.uint([1, 2]))
+
+
+# class TestTtlsTable(TestCase):
 
 #     def test_init(self):
-#         events = TTLs(
-#             name='TTLs',
-#             description='ttl pulses from my experiment',
-#             timestamps=[0., 1., 2.],
-#             resolution=1e-5,
-#             data=np.uint([3, 4, 3]),
-#             labels=['', '', '', 'event1', 'event2']
+#         ttls_table = TtlsTable(description="Metadata about TTLs")
+#         assert events_table.name == "EventsTable"
+#         assert events_table.description == "Metadata about events"
+
+#     def test_init_dtr(self):
+#         event_types_table = EventTypesTable(description="Metadata about event types")
+#         event_types_table.add_row(
+#             event_name="cue on",
+#             event_type_description="Times when the cue was on screen.",
 #         )
-#         self.assertEqual(events.name, 'TTLs')
-#         self.assertEqual(events.description, 'ttl pulses from my experiment')
-#         self.assertEqual(events.timestamps, [0., 1., 2.])
-#         self.assertEqual(events.resolution, 1e-5)
-#         self.assertEqual(events.unit, 'seconds')
-#         np.testing.assert_array_equal(events.data, np.uint([3, 4, 3])),
-#         self.assertEqual(events.labels, ['', '', '', 'event1', 'event2'])
+#         event_types_table.add_row(
+#             event_name="stimulus on",
+#             event_type_description="Times when the stimulus was on screen.",
+#         )
+
+#         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+#         assert events_table["event_type"].table is event_types_table
+
+#     def test_add_row(self):
+#         event_types_table = EventTypesTable(description="Metadata about event types")
+#         event_types_table.add_row(
+#             event_name="cue on",
+#             event_type_description="Times when the cue was on screen.",
+#             # hed_tags=["Sensory-event", "(Intended-effect, Cue)"],
+#         )
+#         event_types_table.add_row(
+#             event_name="stimulus on",
+#             event_type_description="Times when the stimulus was on screen.",
+#             # hed_tags=["Sensory-event", "Experimental-stimulus", "Visual-presentation", "Image", "Face"],
+#         )
+
+#         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+#         events_table.add_row(
+#             timestamp=0.1,
+#             value="white circle",
+#             event_type=0,
+#             duration=0.2,
+#             # hed_tags=["(White, Circle)"],
+#         )
+#         events_table.add_row(
+#             timestamp=1.1,
+#             value="green square",
+#             event_type=0,
+#             duration=0.15,
+#             # hed_tags=["(Green, Square)"],
+#         )
+#         assert events_table["timestamp"].data == [0.1, 1.1]
+#         assert events_table["value"].data == ["white circle", "green square"]
+#         assert events_table["duration"].data == [0.2, 0.15]
+#         assert events_table["event_type"].data == [0, 0]
+#         # assert events_table["hed_tags"][0] == ["(White, Circle)"]
+#         # assert events_table["hed_tags"][1] == ["(Green, Square)"]
 
 
-# class TestAnnotatedEventsTable(TestCase):
+# class TestEventsTableSimpleRoundtrip(TestCase):
+#     """Simple roundtrip test for EventsTable."""
 
-#     def test_init(self):
-#         events = AnnotatedEventsTable(
-#             name='AnnotatedEventsTable',
-#             description='annotated events from my experiment',
-#             resolution=1e-5
-#         )
-#         self.assertEqual(events.name, 'AnnotatedEventsTable')
-#         self.assertEqual(events.description, 'annotated events from my experiment')
-#         self.assertEqual(events.resolution, 1e-5)
+#     def setUp(self):
+#         self.path = "test.nwb"
 
-#     def test_add_event_type(self):
-#         events = AnnotatedEventsTable(
-#             name='AnnotatedEventsTable',
-#             description='annotated events from my experiment'
+#     def tearDown(self):
+#         remove_test_file(self.path)
+
+#     def test_roundtrip(self):
+#         """
+#         Create an EventsTable, write it to file, read the file, and test that the read table matches the original.
+#         """
+#         # NOTE that when adding an EventTypesTable to a Task, the EventTypesTable
+#         # must be named "event_types" according to the spec
+#         event_types_table = EventTypesTable(name="event_types", description="Metadata about event types")
+#         event_types_table.add_row(
+#             event_name="cue on",
+#             event_type_description="Times when the cue was on screen.",
+#             # hed_tags=["Sensory-event", "(Intended-effect, Cue)"],
 #         )
-#         events.add_event_type(
-#             label='Reward',
-#             event_description='Times when the animal received juice reward.',
-#             event_times=[1., 2., 3.],
-#             id=3
+#         event_types_table.add_row(
+#             event_name="stimulus on",
+#             event_type_description="Times when the stimulus was on screen.",
+#             # hed_tags=["Sensory-event", "Experimental-stimulus", "Visual-presentation", "Image", "Face"],
 #         )
-#         events.add_event_type(
-#             label='Abort',
-#             event_description='Times when the animal aborted the trial.',
-#             event_times=[0.5, 4.5],
-#             id=4
+
+#         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+#         events_table.add_row(
+#             timestamp=0.1,
+#             value="white circle",
+#             event_type=0,
+#             duration=0.2,
+#             # hed_tags=["(White, Circle)"],
 #         )
-#         self.assertEqual(events.id.data, [3, 4])
-#         self.assertEqual(events['event_times'][0], [1., 2., 3.])
-#         self.assertEqual(events['event_times'][1], [0.5, 4.5])
-#         self.assertEqual(events['label'][0], 'Reward')
-#         self.assertEqual(events['label'][1], 'Abort')
-#         self.assertListEqual(events['event_description'].data, ['Times when the animal received juice reward.',
-#                                                                 'Times when the animal aborted the trial.'])
-#         self.assertEqual(events.colnames, ('event_times', 'label', 'event_description'))
-#         self.assertEqual(len(events.columns), 4)
-#         self.assertEqual(events.columns[0].name, 'event_times_index')
-#         self.assertIsInstance(events.columns[0], VectorIndex)
-#         self.assertIs(events.columns[0].target, events.columns[1])
-#         self.assertEqual(events.columns[1].name, 'event_times')
-#         self.assertIsInstance(events.columns[1], VectorData)
-#         self.assertEqual(events.columns[2].name, 'label')
-#         self.assertIsInstance(events.columns[2], VectorData)
-#         self.assertEqual(events.columns[3].name, 'event_description')
-#         self.assertIsInstance(events.columns[3], VectorData)
-#         self.assertEqual(events.resolution, None)
+#         events_table.add_row(
+#             timestamp=1.1,
+#             value="green square",
+#             event_type=0,
+#             duration=0.15,
+#             # hed_tags=["(Green, Square)"],
+#         )
+#         task = Task()
+#         task.event_types = event_types_table
+#         nwbfile = mock_NWBFile()
+#         nwbfile.add_lab_meta_data(task)
+#         nwbfile.add_acquisition(events_table)
+
+#         with NWBHDF5IO(self.path, mode="w") as io:
+#             io.write(nwbfile)
+
+#         with NWBHDF5IO(self.path, mode="r", load_namespaces=True) as io:
+#             read_nwbfile = io.read()
+#             read_event_types_table = read_nwbfile.get_lab_meta_data("task").event_types
+#             read_events_table = read_nwbfile.acquisition["EventsTable"]
+#             assert isinstance(read_events_table, EventsTable)
+#             assert read_events_table.name == "EventsTable"
+#             assert read_events_table.description == "Metadata about events"
+#             assert all(read_events_table["timestamp"].data[:] == [0.1, 1.1])
+#             assert all(
+#                 read_events_table["value"].data[:] == [
+#                     "white circle",
+#                     "green square",
+#                 ]
+#             )
+#             assert all(read_events_table["duration"].data[:] == [0.2, 0.15])
+#             assert all(read_events_table["event_type"].data[:] == [0, 0])
+#             assert read_events_table["event_type"].table is read_event_types_table
+
+
