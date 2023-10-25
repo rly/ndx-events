@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
 import os.path
-
 from pynwb.spec import NWBNamespaceBuilder, export_spec, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 
 
@@ -16,45 +14,53 @@ def main():
 
     ns_builder.include_namespace('core')
 
-    # events = NWBGroupSpec(
-    #     neurodata_type_def='Events',
-    #     neurodata_type_inc='NWBDataInterface',
-    #     doc=("A simple list of timestamps, stored in seconds, of an event type. For example, this neurodata type "
-    #          "could be used to store all the times that a nosepoke was detected. The name may be set to "
-    #          "'nosepoke_onset'."),
-    #     attributes=[
-    #         NWBAttributeSpec(
-    #             name='description',
-    #             dtype='text',
-    #             doc='Description of the event type.',
-    #         ),
-    #     ],
-    #     datasets=[
-    #         NWBDatasetSpec(
-    #             name='timestamps',
-    #             dtype='float32',
-    #             dims=['num_events'],
-    #             shape=[None],
-    #             doc=('Event timestamps, in seconds, relative to the common experiment master-clock stored in '
-    #                 'NWBFile.timestamps_reference_time.'),
-    #             attributes=[
-    #                 NWBAttributeSpec(
-    #                     name='unit',
-    #                     dtype='text',
-    #                     value='seconds',
-    #                     doc="Unit of measurement for timestamps, which is fixed to 'seconds'.",
-    #                 ),
-    #                 NWBAttributeSpec(
-    #                     name='resolution',
-    #                     dtype='float32',
-    #                     doc=('The smallest possible difference between two event times. Usually 1 divided by the '
-    #                         'event time sampling rate on the data acquisition system.'),
-    #                     required=False,
-    #                 ),
-    #             ],
-    #         ),
-    #     ],
-    # )
+    timestamp_vector_data = NWBDatasetSpec(
+        neurodata_type_def="TimestampVectorData",
+        neurodata_type_inc="VectorData",
+        doc="A VectorData that stores timestamps in seconds.",
+        dtype="float64",
+        dims=['num_times'],
+        shape=[None],
+        attributes=[
+            NWBAttributeSpec(
+                name="unit",
+                dtype="text",
+                doc="The unit of measurement for the timestamps, fixed to 'seconds'.",
+                value="seconds",
+            ),
+            NWBAttributeSpec(
+                name="resolution",
+                dtype="float64",
+                doc=("The smallest possible difference between two timestamps. Usually 1 divided by the "
+                     "sampling rate for timestamps of the data acquisition system."),
+                required=False,
+            ),
+        ],
+    )
+
+    duration_vector_data = NWBDatasetSpec(
+        neurodata_type_def="DurationVectorData",
+        neurodata_type_inc="VectorData",
+        doc="A VectorData that stores durations in seconds.",
+        dtype="float64",
+        dims=['num_events'],
+        shape=[None],
+        attributes=[
+            NWBAttributeSpec(
+                name="unit",
+                dtype="text",
+                doc="The unit of measurement for the durations, fixed to 'seconds'.",
+                value="seconds",
+            ),
+            NWBAttributeSpec(
+                name="resolution",
+                dtype="float64",
+                doc=("The smallest possible difference between two timestamps. Usually 1 divided by the "
+                     "sampling rate for timestamps of the data acquisition system."),
+                required=False,
+            ),
+        ],
+    )
 
     event_types_table = NWBGroupSpec(
         neurodata_type_def="EventTypesTable",
@@ -74,32 +80,6 @@ def main():
                 dtype='text',
                 doc='Description of each event type.',
             ),
-            NWBDatasetSpec(
-                name='hed_tags',
-                neurodata_type_inc='VectorData',
-                dtype='text',
-                dims=['num_tags'],
-                shape=[None],
-                doc=("Optional column containing the Hierarchical Event Descriptor (HED) tags for each event type."),
-                quantity="?",
-            ),
-            NWBDatasetSpec(
-                name='hed_tags_index',
-                neurodata_type_inc='VectorIndex',
-                dims=['num_events'],
-                shape=[None],
-                doc=("Index column for `hed_tags` column."),
-                quantity="?",
-            ),
-        ],
-        attributes=[  # override required description attribute from DynamicTable
-            NWBAttributeSpec(
-                name='description',
-                dtype='text',
-                doc='Description of the event types table.',
-                default_value="Metadata about event types.",
-                required=True,
-            ),
         ],
     )
 
@@ -114,26 +94,8 @@ def main():
         datasets=[
             NWBDatasetSpec(
                 name='timestamp',
-                neurodata_type_inc='VectorData',
-                dtype='float32',
-                dims=['num_events'],
-                shape=[None],
-                doc=("The time that the event occurred, in seconds, from the session start time."),
-                attributes=[
-                    NWBAttributeSpec(
-                        name='unit',
-                        dtype='text',
-                        value='seconds',
-                        doc="Unit of measurement for timestamps, which is fixed to 'seconds'.",
-                    ),
-                    NWBAttributeSpec(
-                        name='resolution',
-                        dtype='float32',
-                        doc=('The smallest possible difference between two event times. Usually 1 divided by the '
-                            'event time sampling rate on the data acquisition system.'),
-                        required=False,
-                    ),
-                ],
+                neurodata_type_inc='TimestampVectorData',
+                doc="The time that each event occurred, in seconds, from the session start time.",
             ),
             NWBDatasetSpec(
                 name='event_type',
@@ -154,40 +116,9 @@ def main():
             ),
             NWBDatasetSpec(
                 name='duration',
-                neurodata_type_inc='VectorData',
-                dtype='float32',
-                dims=['num_events'],
-                shape=[None],
-                doc=("Optional column containing the duration of each event, in seconds."),
+                neurodata_type_inc='DurationVectorData',
+                doc="Optional column containing the duration of each event, in seconds.",
                 quantity="?",
-            ),
-            NWBDatasetSpec(
-                name='hed_tags',
-                neurodata_type_inc='VectorData',
-                dtype='text',
-                dims=['num_tags'],
-                shape=[None],
-                doc=("Optional column containing the Hierarchical Event Descriptor (HED) tags for each event. "
-                     "HED tags should be used at the event type level, not at the event instance level, when "
-                     "possible, unless it is important to annotate events individually."),
-                quantity="?",
-            ),
-            NWBDatasetSpec(
-                name='hed_tags_index',
-                neurodata_type_inc='VectorIndex',
-                dims=['num_events'],
-                shape=[None],
-                doc=("Index column for `hed_tags` column."),
-                quantity="?",
-            ),
-        ],
-        attributes=[  # override required description attribute from DynamicTable
-            NWBAttributeSpec(
-                name='description',
-                dtype='text',
-                doc='Description of the events table.',
-                default_value="Metadata about events.",
-                required=True,
             ),
         ],
     )
@@ -225,7 +156,24 @@ def main():
         ],
     )
 
-    new_data_types = [event_types_table, events_table, ttl_types_table, ttls_table]
+    task = NWBGroupSpec(
+        neurodata_type_def='Task',
+        neurodata_type_inc='LabMetaData',
+        doc=("A group to store task-related general metadata. TODO When merged with core, "
+             "this will no longer inherit from LabMetaData but from NWBContainer and be placed "
+             "optionally in /general."),
+        name="task",
+        groups=[
+            NWBGroupSpec(
+                name="event_types",
+                neurodata_type_inc="EventTypesTable",
+                doc="Table to store information about each task event type.",
+                quantity="?",
+            ),
+        ],
+    )
+
+    new_data_types = [timestamp_vector_data, duration_vector_data, event_types_table, events_table, ttl_types_table, ttls_table, task, ]
 
     # export the spec to yaml files in the spec folder
     output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'spec'))
