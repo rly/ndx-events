@@ -69,14 +69,6 @@ groups:
     - null
     doc: The type of event that occurred. This is represented as a reference to a
       row of the EventTypesTable.
-  - name: value
-    neurodata_type_inc: VectorData
-    dtype: text
-    dims:
-    - num_events
-    shape:
-    - null
-    doc: Optional column containing the text value of each event.
     quantity: '?'
   - name: duration
     neurodata_type_inc: DurationVectorData
@@ -97,7 +89,7 @@ groups:
   default_name: TtlsTable
   doc: Data type to hold timestamps of TTL pulses.
   datasets:
-  - name: event_type
+  - name: ttl_type
     neurodata_type_inc: DynamicTableRegion
     dims:
     - num_events

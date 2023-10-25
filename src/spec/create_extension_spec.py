@@ -104,14 +104,6 @@ def main():
                 shape=[None],
                 doc=("The type of event that occurred. This is represented as a reference "
                      "to a row of the EventTypesTable."),
-            ),
-            NWBDatasetSpec(
-                name='value',
-                neurodata_type_inc='VectorData',
-                dtype='text',
-                dims=['num_events'],
-                shape=[None],
-                doc=("Optional column containing the text value of each event."),
                 quantity="?",
             ),
             NWBDatasetSpec(
@@ -146,7 +138,7 @@ def main():
         default_name="TtlsTable",
         datasets=[
             NWBDatasetSpec(
-                name='event_type',
+                name='ttl_type',
                 neurodata_type_inc='DynamicTableRegion',
                 dims=['num_events'],
                 shape=[None],

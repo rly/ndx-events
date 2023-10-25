@@ -14,6 +14,7 @@ class TestTimestampVectorData(TestCase):
         assert data.name == "test"
         assert data.description == "description"
         assert data.unit == "seconds"
+        assert data.resolution == None
 
     def test_add_to_dynamic_table(self):
         col = TimestampVectorData(name="test", description="description")
@@ -21,6 +22,15 @@ class TestTimestampVectorData(TestCase):
         table.add_row(test=0.1)
         assert table.test is col
         assert table.test[0] == 0.1
+
+    def test_set_resolution_init(self):
+        data = TimestampVectorData(name="test", description="description", resolution=1/32000.0)
+        assert data.resolution == 1/32000.0
+
+    def test_set_resolution_attr(self):
+        data = TimestampVectorData(name="test", description="description")
+        data.resolution = 1/32000.0
+        assert data.resolution == 1/32000.0
 
 
 class TestTimestampVectorDataSimpleRoundtrip(TestCase):
@@ -259,26 +269,45 @@ class TestEventsTable(TestCase):
         )
 
         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+        events_table.add_column(name="cue_type", description="The cue type.")
+        events_table.add_column(name="stimulus_type", description="The stimulus type.")
         events_table.add_row(
             timestamp=0.1,
-            value="white circle",
+            cue_type="white circle",
+            stimulus_type="",
             event_type=0,
-            duration=0.2,
+            duration=0.1,
             # hed_tags=["(White, Circle)"],
         )
         events_table.add_row(
-            timestamp=1.1,
-            value="green square",
-            event_type=0,
+            timestamp=0.3,
+            cue_type="",
+            stimulus_type="animal",
+            event_type=1,
             duration=0.15,
+        )
+        events_table.add_row(
+            timestamp=1.1,
+            cue_type="green square",
+            stimulus_type="",
+            event_type=0,
+            duration=0.1,
             # hed_tags=["(Green, Square)"],
         )
-        assert events_table["timestamp"].data == [0.1, 1.1]
-        assert events_table["value"].data == ["white circle", "green square"]
-        assert events_table["duration"].data == [0.2, 0.15]
-        assert events_table["event_type"].data == [0, 0]
+        events_table.add_row(
+            timestamp=1.3,
+            cue_type="",
+            stimulus_type="landscape",
+            event_type=1,
+            duration=0.15,
+        )
+        assert events_table["timestamp"].data == [0.1, 0.3, 1.1, 1.3]
+        assert events_table["cue_type"].data == ["white circle", "", "green square", ""]
+        assert events_table["stimulus_type"].data == ["", "animal", "", "landscape"]
+        assert events_table["duration"].data == [0.1, 0.15, 0.1, 0.15]
+        assert events_table["event_type"].data == [0, 1, 0, 1]
         # assert events_table["hed_tags"][0] == ["(White, Circle)"]
-        # assert events_table["hed_tags"][1] == ["(Green, Square)"]
+        # assert events_table["hed_tags"][2] == ["(Green, Square)"]
 
 
 class TestEventsTableSimpleRoundtrip(TestCase):
@@ -309,20 +338,39 @@ class TestEventsTableSimpleRoundtrip(TestCase):
         )
 
         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+        events_table.add_column(name="cue_type", description="The cue type.")
+        events_table.add_column(name="stimulus_type", description="The stimulus type.")
         events_table.add_row(
             timestamp=0.1,
-            value="white circle",
+            cue_type="white circle",
+            stimulus_type="",
             event_type=0,
-            duration=0.2,
+            duration=0.1,
             # hed_tags=["(White, Circle)"],
         )
         events_table.add_row(
-            timestamp=1.1,
-            value="green square",
-            event_type=0,
+            timestamp=0.3,
+            cue_type="",
+            stimulus_type="animal",
+            event_type=1,
             duration=0.15,
+        )
+        events_table.add_row(
+            timestamp=1.1,
+            cue_type="green square",
+            stimulus_type="",
+            event_type=0,
+            duration=0.1,
             # hed_tags=["(Green, Square)"],
         )
+        events_table.add_row(
+            timestamp=1.3,
+            cue_type="",
+            stimulus_type="landscape",
+            event_type=1,
+            duration=0.15,
+        )
+
         task = Task()
         task.event_types = event_types_table
         nwbfile = mock_NWBFile()
@@ -339,15 +387,11 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             assert isinstance(read_events_table, EventsTable)
             assert read_events_table.name == "EventsTable"
             assert read_events_table.description == "Metadata about events"
-            assert all(read_events_table["timestamp"].data[:] == [0.1, 1.1])
-            assert all(
-                read_events_table["value"].data[:] == [
-                    "white circle",
-                    "green square",
-                ]
-            )
-            assert all(read_events_table["duration"].data[:] == [0.2, 0.15])
-            assert all(read_events_table["event_type"].data[:] == [0, 0])
+            assert all(read_events_table["timestamp"].data[:] == [0.1, 0.3, 1.1, 1.3])
+            assert all(read_events_table["cue_type"].data[:] == ["white circle", "", "green square", ""])
+            assert all(read_events_table["stimulus_type"].data[:] == ["", "animal", "", "landscape"])
+            assert all(read_events_table["duration"].data[:] == [0.1, 0.15, 0.1, 0.15])
+            assert all(read_events_table["event_type"].data[:] == [0, 1, 0, 1])
             assert read_events_table["event_type"].table is read_event_types_table
 
 
@@ -433,130 +477,108 @@ class TestTtlTypesTableSimpleRoundtrip(TestCase):
             assert all(read_ttl_types_table["pulse_value"].data[:] == np.uint([1, 2]))
 
 
-# class TestTtlsTable(TestCase):
+class TestTtlsTable(TestCase):
 
-#     def test_init(self):
-#         ttls_table = TtlsTable(description="Metadata about TTLs")
-#         assert events_table.name == "EventsTable"
-#         assert events_table.description == "Metadata about events"
+    def test_init(self):
+        ttls_table = TtlsTable(description="Metadata about TTLs")
+        assert ttls_table.name == "TtlsTable"
+        assert ttls_table.description == "Metadata about TTLs"
 
-#     def test_init_dtr(self):
-#         event_types_table = EventTypesTable(description="Metadata about event types")
-#         event_types_table.add_row(
-#             event_name="cue on",
-#             event_type_description="Times when the cue was on screen.",
-#         )
-#         event_types_table.add_row(
-#             event_name="stimulus on",
-#             event_type_description="Times when the stimulus was on screen.",
-#         )
+    def test_init_dtr(self):
+        ttl_types_table = TtlTypesTable(description="Metadata about TTL types")
+        ttl_types_table.add_row(
+            event_name="cue on",
+            event_type_description="Times when the cue was on screen.",
+            pulse_value=np.uint(1),
+        )
+        ttl_types_table.add_row(
+            event_name="stimulus on",
+            event_type_description="Times when the stimulus was on screen.",
+            pulse_value=np.uint(2),
+        )
 
-#         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
-#         assert events_table["event_type"].table is event_types_table
+        ttls_table = TtlsTable(description="Metadata about TTLs", target_tables={"ttl_type": ttl_types_table})
+        assert ttls_table["ttl_type"].table is ttl_types_table
 
-#     def test_add_row(self):
-#         event_types_table = EventTypesTable(description="Metadata about event types")
-#         event_types_table.add_row(
-#             event_name="cue on",
-#             event_type_description="Times when the cue was on screen.",
-#             # hed_tags=["Sensory-event", "(Intended-effect, Cue)"],
-#         )
-#         event_types_table.add_row(
-#             event_name="stimulus on",
-#             event_type_description="Times when the stimulus was on screen.",
-#             # hed_tags=["Sensory-event", "Experimental-stimulus", "Visual-presentation", "Image", "Face"],
-#         )
+    def test_add_row(self):
+        ttl_types_table = TtlTypesTable(description="Metadata about TTL types")
+        ttl_types_table.add_row(
+            event_name="cue on",
+            event_type_description="Times when the cue was on screen.",
+            pulse_value=np.uint(1),
+        )
+        ttl_types_table.add_row(
+            event_name="stimulus on",
+            event_type_description="Times when the stimulus was on screen.",
+            pulse_value=np.uint(2),
+        )
 
-#         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
-#         events_table.add_row(
-#             timestamp=0.1,
-#             value="white circle",
-#             event_type=0,
-#             duration=0.2,
-#             # hed_tags=["(White, Circle)"],
-#         )
-#         events_table.add_row(
-#             timestamp=1.1,
-#             value="green square",
-#             event_type=0,
-#             duration=0.15,
-#             # hed_tags=["(Green, Square)"],
-#         )
-#         assert events_table["timestamp"].data == [0.1, 1.1]
-#         assert events_table["value"].data == ["white circle", "green square"]
-#         assert events_table["duration"].data == [0.2, 0.15]
-#         assert events_table["event_type"].data == [0, 0]
-#         # assert events_table["hed_tags"][0] == ["(White, Circle)"]
-#         # assert events_table["hed_tags"][1] == ["(Green, Square)"]
+        ttls_table = TtlsTable(description="Metadata about TTLs", target_tables={"ttl_type": ttl_types_table})
+        ttls_table.add_row(
+            timestamp=0.1,
+            ttl_type=0,
+        )
+        ttls_table.add_row(
+            timestamp=1.1,
+            ttl_type=0,
+        )
+        assert ttls_table["timestamp"].data == [0.1, 1.1]
+        assert ttls_table["ttl_type"].data == [0, 0]
 
 
-# class TestEventsTableSimpleRoundtrip(TestCase):
-#     """Simple roundtrip test for EventsTable."""
+class TestTtlsTableSimpleRoundtrip(TestCase):
+    """Simple roundtrip test for TtlsTable."""
 
-#     def setUp(self):
-#         self.path = "test.nwb"
+    def setUp(self):
+        self.path = "test.nwb"
 
-#     def tearDown(self):
-#         remove_test_file(self.path)
+    def tearDown(self):
+        remove_test_file(self.path)
 
-#     def test_roundtrip(self):
-#         """
-#         Create an EventsTable, write it to file, read the file, and test that the read table matches the original.
-#         """
-#         # NOTE that when adding an EventTypesTable to a Task, the EventTypesTable
-#         # must be named "event_types" according to the spec
-#         event_types_table = EventTypesTable(name="event_types", description="Metadata about event types")
-#         event_types_table.add_row(
-#             event_name="cue on",
-#             event_type_description="Times when the cue was on screen.",
-#             # hed_tags=["Sensory-event", "(Intended-effect, Cue)"],
-#         )
-#         event_types_table.add_row(
-#             event_name="stimulus on",
-#             event_type_description="Times when the stimulus was on screen.",
-#             # hed_tags=["Sensory-event", "Experimental-stimulus", "Visual-presentation", "Image", "Face"],
-#         )
+    def test_roundtrip(self):
+        """
+        Create a TtlsTable, write it to file, read the file, and test that the read table matches the original.
+        """
+        # NOTE that when adding an TtlTypesTable to a Task, the TtlTypesTable
+        # must be named "ttl_types" according to the spec
+        ttl_types_table = TtlTypesTable(name="ttl_types", description="Metadata about TTL types")
+        ttl_types_table.add_row(
+            event_name="cue on",
+            event_type_description="Times when the cue was on screen.",
+            pulse_value=np.uint(1),
+        )
+        ttl_types_table.add_row(
+            event_name="stimulus on",
+            event_type_description="Times when the stimulus was on screen.",
+            pulse_value=np.uint(2),
+        )
 
-#         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
-#         events_table.add_row(
-#             timestamp=0.1,
-#             value="white circle",
-#             event_type=0,
-#             duration=0.2,
-#             # hed_tags=["(White, Circle)"],
-#         )
-#         events_table.add_row(
-#             timestamp=1.1,
-#             value="green square",
-#             event_type=0,
-#             duration=0.15,
-#             # hed_tags=["(Green, Square)"],
-#         )
-#         task = Task()
-#         task.event_types = event_types_table
-#         nwbfile = mock_NWBFile()
-#         nwbfile.add_lab_meta_data(task)
-#         nwbfile.add_acquisition(events_table)
+        ttls_table = TtlsTable(description="Metadata about TTLs", target_tables={"ttl_type": ttl_types_table})
+        ttls_table.add_row(
+            timestamp=0.1,
+            ttl_type=0,
+        )
+        ttls_table.add_row(
+            timestamp=1.1,
+            ttl_type=0,
+        )
 
-#         with NWBHDF5IO(self.path, mode="w") as io:
-#             io.write(nwbfile)
+        task = Task()
+        task.ttl_types = ttl_types_table
+        nwbfile = mock_NWBFile()
+        nwbfile.add_lab_meta_data(task)
+        nwbfile.add_acquisition(ttls_table)
 
-#         with NWBHDF5IO(self.path, mode="r", load_namespaces=True) as io:
-#             read_nwbfile = io.read()
-#             read_event_types_table = read_nwbfile.get_lab_meta_data("task").event_types
-#             read_events_table = read_nwbfile.acquisition["EventsTable"]
-#             assert isinstance(read_events_table, EventsTable)
-#             assert read_events_table.name == "EventsTable"
-#             assert read_events_table.description == "Metadata about events"
-#             assert all(read_events_table["timestamp"].data[:] == [0.1, 1.1])
-#             assert all(
-#                 read_events_table["value"].data[:] == [
-#                     "white circle",
-#                     "green square",
-#                 ]
-#             )
-#             assert all(read_events_table["duration"].data[:] == [0.2, 0.15])
-#             assert all(read_events_table["event_type"].data[:] == [0, 0])
-#             assert read_events_table["event_type"].table is read_event_types_table
+        with NWBHDF5IO(self.path, mode="w") as io:
+            io.write(nwbfile)
 
-
+        with NWBHDF5IO(self.path, mode="r", load_namespaces=True) as io:
+            read_nwbfile = io.read()
+            read_ttl_types_table = read_nwbfile.get_lab_meta_data("task").ttl_types
+            read_ttls_table = read_nwbfile.acquisition["TtlsTable"]
+            assert isinstance(read_ttls_table, TtlsTable)
+            assert read_ttls_table.name == "TtlsTable"
+            assert read_ttls_table.description == "Metadata about TTLs"
+            assert all(read_ttls_table["timestamp"].data[:] == [0.1, 1.1])
+            assert all(read_ttls_table["ttl_type"].data[:] == [0, 0])
+            assert read_ttls_table["ttl_type"].table is read_ttl_types_table
