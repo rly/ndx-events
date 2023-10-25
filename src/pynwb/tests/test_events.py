@@ -235,12 +235,10 @@ class TestEventsTable(TestCase):
         event_types_table.add_row(
             event_name="cue on",
             event_type_description="Times when the cue was on screen.",
-            # hed_tags=["Sensory-event", "(Intended-effect, Cue)"],
         )
         event_types_table.add_row(
             event_name="stimulus on",
             event_type_description="Times when the stimulus was on screen.",
-            # hed_tags=["Sensory-event", "Experimental-stimulus", "Visual-presentation", "Image", "Face"],
         )
 
         events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
@@ -277,11 +275,80 @@ class TestEventsTable(TestCase):
         assert events_table["timestamp"].data == [0.1, 1.1]
         assert events_table["value"].data == ["white circle", "green square"]
         assert events_table["duration"].data == [0.2, 0.15]
+        assert events_table["event_type"].data == [0, 0]
         # assert events_table["hed_tags"][0] == ["(White, Circle)"]
         # assert events_table["hed_tags"][1] == ["(Green, Square)"]
 
 
-## TODO: TestEventsTableSimpleRoundtrip
+class TestEventsTableSimpleRoundtrip(TestCase):
+    """Simple roundtrip test for EventsTable."""
+
+    def setUp(self):
+        self.path = "test.nwb"
+
+    def tearDown(self):
+        remove_test_file(self.path)
+
+    def test_roundtrip(self):
+        """
+        Create an EventsTable, write it to file, read the file, and test that the read table matches the original.
+        """
+        # NOTE that when adding an EventTypesTable to a Task, the EventTypesTable
+        # must be named "event_types" according to the spec
+        event_types_table = EventTypesTable(name="event_types", description="Metadata about event types")
+        event_types_table.add_row(
+            event_name="cue on",
+            event_type_description="Times when the cue was on screen.",
+            # hed_tags=["Sensory-event", "(Intended-effect, Cue)"],
+        )
+        event_types_table.add_row(
+            event_name="stimulus on",
+            event_type_description="Times when the stimulus was on screen.",
+            # hed_tags=["Sensory-event", "Experimental-stimulus", "Visual-presentation", "Image", "Face"],
+        )
+
+        events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+        events_table.add_row(
+            timestamp=0.1,
+            value="white circle",
+            event_type=0,
+            duration=0.2,
+            # hed_tags=["(White, Circle)"],
+        )
+        events_table.add_row(
+            timestamp=1.1,
+            value="green square",
+            event_type=0,
+            duration=0.15,
+            # hed_tags=["(Green, Square)"],
+        )
+        task = Task()
+        task.event_types = event_types_table
+        nwbfile = mock_NWBFile()
+        nwbfile.add_lab_meta_data(task)
+        nwbfile.add_acquisition(events_table)
+        breakpoint()
+
+        with NWBHDF5IO(self.path, mode="w") as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO(self.path, mode="r", load_namespaces=True) as io:
+            read_nwbfile = io.read()
+            read_event_types_table = read_nwbfile.get_lab_meta_data("task").event_types
+            read_events_table = read_nwbfile.acquisition["EventsTable"]
+            assert isinstance(read_events_table, EventsTable)
+            assert read_events_table.name == "EventsTable"
+            assert read_events_table.description == "Metadata about events"
+            assert all(read_events_table["timestamp"].data[:] == [0.1, 1.1])
+            assert all(
+                read_events_table["value"].data[:] == [
+                    "white circle",
+                    "green square",
+                ]
+            )
+            assert all(read_events_table["duration"].data[:] == [0.2, 0.15])
+            assert all(read_events_table["event_type"].data[:] == [0, 0])
+            assert read_events_table["event_type"].table is read_event_types_table
 
 
 
