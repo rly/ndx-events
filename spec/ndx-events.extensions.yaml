@@ -41,12 +41,6 @@ groups:
   default_name: EventTypesTable
   doc: A column-based table to store information about each event type, such as name,
     one event type per row.
-  attributes:
-  - name: description
-    dtype: text
-    default_value: Metadata about event types.
-    doc: Description of the event types table.
-    required: false
   datasets:
   - name: event_name
     neurodata_type_inc: VectorData
@@ -63,12 +57,6 @@ groups:
     event per row. Each event must have an event_type, which is a row in the EventTypesTable.
     Additional columns may be added to store metadata about each event, such as the
     duration of the event, or a text value of the event.
-  attributes:
-  - name: description
-    dtype: text
-    default_value: Metadata about events.
-    doc: Description of the events table.
-    required: false
   datasets:
   - name: timestamp
     neurodata_type_inc: TimestampVectorData
@@ -115,7 +103,7 @@ groups:
     - num_events
     shape:
     - null
-    doc: The type of TTL that occured. This is represented as a reference to a row
+    doc: The type of TTL that occurred. This is represented as a reference to a row
       of the TtlTypesTable.
 - neurodata_type_def: Task
   neurodata_type_inc: LabMetaData

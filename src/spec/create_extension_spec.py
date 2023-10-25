@@ -150,7 +150,7 @@ def main():
                 neurodata_type_inc='DynamicTableRegion',
                 dims=['num_events'],
                 shape=[None],
-                doc=("The type of TTL that occured. This is represented as a reference "
+                doc=("The type of TTL that occurred. This is represented as a reference "
                      "to a row of the TtlTypesTable."),
             ),
         ],
