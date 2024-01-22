@@ -17,7 +17,7 @@ def main():
     timestamp_vector_data = NWBDatasetSpec(
         neurodata_type_def="TimestampVectorData",
         neurodata_type_inc="VectorData",
-        doc="A VectorData that stores timestamps in seconds.",
+        doc="A 1-dimensional VectorData that stores timestamps in seconds.",
         dtype="float64",
         dims=["num_times"],
         shape=[None],
@@ -26,8 +26,11 @@ def main():
                 name="unit",
                 dtype="text",
                 doc="The unit of measurement for the timestamps, fixed to 'seconds'.",
-                value="seconds",
+                value="xseconds",
             ),
+            # NOTE: this requires all timestamps to have the same resolution which may not be true
+            # if they come from different acquisition systems or processing pipelines...
+            # maybe this should be a column of the event type table instead?
             NWBAttributeSpec(
                 name="resolution",
                 dtype="float64",
@@ -43,7 +46,7 @@ def main():
     duration_vector_data = NWBDatasetSpec(
         neurodata_type_def="DurationVectorData",
         neurodata_type_inc="VectorData",
-        doc="A VectorData that stores durations in seconds.",
+        doc="A 1-dimensional VectorData that stores durations in seconds.",
         dtype="float64",
         dims=["num_events"],
         shape=[None],
@@ -54,6 +57,7 @@ def main():
                 doc="The unit of measurement for the durations, fixed to 'seconds'.",
                 value="seconds",
             ),
+            # NOTE: this is usually the same as the timestamp resolution
             NWBAttributeSpec(
                 name="resolution",
                 dtype="float64",
@@ -92,10 +96,11 @@ def main():
         neurodata_type_inc="DynamicTable",
         doc=(
             "A column-based table to store information about events (event instances), one event per row. "
-            "Each event must have an event_type, which is a row in the EventTypesTable. Additional columns "
-            "may be added to store metadata about each event, such as the duration of the event, or a "
-            "text value of the event."
+            "Each event must have an event_type, which is a reference to a row in the EventTypesTable. "
+            "Additional columns may be added to store metadata about each event, such as the duration "
+            "of the event, or a text value of the event."
         ),
+        # NOTE: custom columns should apply to every event in the table which may not be the case
         default_name="EventsTable",
         datasets=[
             NWBDatasetSpec(

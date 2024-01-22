@@ -1,4 +1,4 @@
-def test_example_usage():
+def test_example_usage1():
     from datetime import datetime
     from ndx_events import EventsTable, EventTypesTable, TtlsTable, TtlTypesTable, Task
     import numpy as np
@@ -42,7 +42,7 @@ def test_example_usage():
     )
     learning_response_description = (
         "During the learning phase, subjects are instructed to respond to the following "
-        "question: 'Is this an animal?' in each trial. Response are encoded as 'Yes, this "
+        "question: 'Is this an animal?' in each trial. Responses are encoded as 'Yes, this "
         "is an animal' (20) and 'No, this is not an animal' (21)."
     )
     ttl_types_table.add_row(
@@ -185,5 +185,55 @@ def test_example_usage():
         print(read_nwbfile.acquisition["TtlsTable"].to_dataframe())
 
 
+def test_example_usage2():
+    """Example storing lick times"""
+    from datetime import datetime
+    from ndx_events import EventsTable, EventTypesTable, Task
+    import numpy as np
+    from pynwb import NWBFile, NWBHDF5IO
+
+    nwbfile = NWBFile(
+        session_description="session description",
+        identifier="cool_experiment_001",
+        session_start_time=datetime.now().astimezone(),
+    )
+
+    # NOTE that when adding an EventTypesTable to a Task, the EventTypesTable
+    # must be named "event_types" according to the spec
+    event_types_table = EventTypesTable(name="event_types", description="Metadata about event types")
+    event_types_table.add_row(
+        event_name="lick",
+        event_type_description="Times when the subject licked the port",
+    )
+
+    # create a random sorted array of 1000 lick timestamps (dtype=float) from 0 to 3600 seconds
+    lick_times = sorted(np.random.uniform(0, 3600, 1000))
+
+    events_table = EventsTable(description="Metadata about events", target_tables={"event_type": event_types_table})
+    for t in lick_times:
+        # event_type=0 corresponds to the first row in the event_types_table
+        events_table.add_row(timestamp=t, event_type=0)
+    events_table.timestamp.resolution = 1 / 30000.0  # licks were detected at 30 kHz
+
+    task = Task()
+    task.event_types = event_types_table
+    nwbfile.add_lab_meta_data(task)
+    nwbfile.add_acquisition(events_table)
+
+    # write nwb file
+    filename = "test.nwb"
+    with NWBHDF5IO(filename, "w") as io:
+        io.write(nwbfile)
+
+    # read nwb file and check its contents
+    with NWBHDF5IO(filename, "r", load_namespaces=True) as io:
+        read_nwbfile = io.read()
+        print(read_nwbfile)
+        # access the events table and event types table and print them
+        print(read_nwbfile.get_lab_meta_data("task").event_types.to_dataframe())
+        print(read_nwbfile.acquisition["EventsTable"].to_dataframe())
+
+
 if __name__ == "__main__":
-    test_example_usage()
+    test_example_usage1()
+    test_example_usage2()

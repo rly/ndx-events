@@ -37,6 +37,30 @@ Matlab:
 generateExtension('<directory path>/ndx-events/spec/ndx-events.namespace.yaml');
 ```
 
+## Developer installation
+In a Python 3.8-3.12 environment:
+```bash
+pip install -r requirements-dev.txt
+pip install -e .
+```
+
+Run tests:
+```bash
+pytest
+```
+
+Install pre-commit hooks:
+```bash
+pre-commit install
+```
+
+Style and other checks:
+```bash
+black .
+ruff .
+codespell .
+```
+
 ## Example usage
 Python:
 
