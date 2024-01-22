@@ -1,158 +1,204 @@
 # -*- coding: utf-8 -*-
-
 import os.path
-
-from pynwb.spec import NWBNamespaceBuilder, export_spec, NWBGroupSpec, NWBAttributeSpec
-from pynwb.spec import NWBDatasetSpec
+from pynwb.spec import NWBNamespaceBuilder, export_spec, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 
 
 def main():
-    # these arguments were auto-generated from your cookiecutter inputs
     ns_builder = NWBNamespaceBuilder(
         doc="""NWB extension for storing timestamped event and TTL pulse data""",
         name="""ndx-events""",
-        version="""0.2.0""",
-        author=list(map(str.strip, """Ryan Ly""".split(','))),
-        contact=list(map(str.strip, """rly@lbl.gov""".split(',')))
+        version="""0.3.0""",
+        author=["Ryan Ly"],
+        contact=["rly@lbl.gov"],
     )
 
-    ns_builder.include_type('NWBDataInterface', namespace='core')
-    ns_builder.include_type('DynamicTable', namespace='core')
-    ns_builder.include_type('VectorData', namespace='core')
-    ns_builder.include_type('VectorIndex', namespace='core')
+    ns_builder.include_namespace("core")
 
-    timestamps = NWBDatasetSpec(
-        name='timestamps',
-        dtype='float32',
-        dims=['num_events'],
+    timestamp_vector_data = NWBDatasetSpec(
+        neurodata_type_def="TimestampVectorData",
+        neurodata_type_inc="VectorData",
+        doc="A 1-dimensional VectorData that stores timestamps in seconds.",
+        dtype="float64",
+        dims=["num_times"],
         shape=[None],
-        doc=('Event timestamps, in seconds, relative to the common experiment master-clock stored in '
-             'NWBFile.timestamps_reference_time.'),
         attributes=[
             NWBAttributeSpec(
-                name='unit',
-                dtype='text',
-                value='seconds',
-                doc="Unit of measurement for timestamps, which is fixed to 'seconds'.",
+                name="unit",
+                dtype="text",
+                doc="The unit of measurement for the timestamps, fixed to 'seconds'.",
+                value="xseconds",
             ),
+            # NOTE: this requires all timestamps to have the same resolution which may not be true
+            # if they come from different acquisition systems or processing pipelines...
+            # maybe this should be a column of the event type table instead?
             NWBAttributeSpec(
-                name='resolution',
-                dtype='float32',
-                doc=('The smallest possible difference between two event times. Usually 1 divided by the event time '
-                     'sampling rate on the data acquisition system.'),
-                required=False,
-            )
-        ]
-    )
-
-    events = NWBGroupSpec(
-        neurodata_type_def='Events',
-        neurodata_type_inc='NWBDataInterface',
-        doc='A list of timestamps, stored in seconds, of an event.',
-        attributes=[
-            NWBAttributeSpec(
-                name='description',
-                dtype='text',
-                doc='Description of the event.',
-            ),
-        ],
-        datasets=[timestamps]
-    )
-
-    labels = NWBAttributeSpec(
-        name='labels',
-        dtype='text',
-        dims=['num_labels'],
-        shape=[None],
-        doc=("Mapping from an unsigned integer (the zero-based index) to a string, used to understand the "
-             "values in the 'data' dataset. Use an empty string to represent a label value that is not "
-             "mapped to any text."),
-    )
-
-    data = NWBDatasetSpec(
-        name='data',
-        dtype='uint8',
-        dims=['num_events'],
-        shape=[None],
-        doc=("Unsigned integer labels that map onto strings using the mapping in the 'labels' array attribute. This "
-             "dataset should have the same number of elements as the 'timestamps' dataset."),
-        attributes=[labels],
-    )
-
-    labeled_events = NWBGroupSpec(
-        neurodata_type_def='LabeledEvents',
-        neurodata_type_inc='Events',
-        doc=("A list of timestamps, stored in seconds, of an event that can have different labels. For example, "
-             "this type could represent the times that reward was given, as well as which of three different "
-             "types of reward was given. In this case, the 'data' dataset would contain values {0, 1, 2}, "
-             "its 'labels' attribute would contain three text elements, where the first (index 0) specifies the "
-             "name of the reward associated with data = 0, the second (index 1) specifies the name of the "
-             "reward associated with data = 1, etc. The labels do not have to start at 0 and do not need to "
-             "be continuous, e.g. the 'data' dataset could contain values {0, 10, 100}, and the 'labels' "
-             "attribute could contain 101 values, where labels[0] is 'No reward', labels[10] is '10% reward', "
-             "labels[100] is 'Full reward', and all other entries in 'labels' are the empty string."),
-        datasets=[data],
-    )
-
-    ttls = NWBGroupSpec(
-        neurodata_type_def='TTLs',
-        neurodata_type_inc='LabeledEvents',
-        doc=("Data type to hold timestamps of TTL pulses. The 'data' dataset contains the integer pulse values "
-             "(or channel IDs), and the 'labels' dataset contains user-defined labels associated with each pulse "
-             "value (or channel ID). The value at index i of the 'labels' dataset corresponds to a pulse value (or "
-             "channel ID) of i in the 'data' dataset. For example, the first value (index 0) of the 'labels' dataset "
-             "corresponds to a pulse value of 0. See the LabeledEvents type for more details."),
-    )
-
-    event_times_index = NWBDatasetSpec(
-        name='event_times_index',
-        neurodata_type_inc='VectorIndex',
-        doc=('Index into the event_times dataset.'),
-    )
-
-    event_times = NWBDatasetSpec(
-        name='event_times',
-        neurodata_type_inc='VectorData',
-        dtype='float32',
-        doc='Event times for each event type.',
-        attributes=[
-            NWBAttributeSpec(
-                name='resolution',
-                dtype='float32',
-                doc=('The smallest possible difference between two event times. Usually 1 divided by the event time '
-                     'sampling rate on the data acquisition system.'),
+                name="resolution",
+                dtype="float64",
+                doc=(
+                    "The smallest possible difference between two timestamps. Usually 1 divided by the "
+                    "sampling rate for timestamps of the data acquisition system."
+                ),
                 required=False,
             ),
         ],
     )
 
-    label_col = NWBDatasetSpec(
-        name='label',
-        neurodata_type_inc='VectorData',
-        dtype='text',
-        doc='Label for each event type.',
+    duration_vector_data = NWBDatasetSpec(
+        neurodata_type_def="DurationVectorData",
+        neurodata_type_inc="VectorData",
+        doc="A 1-dimensional VectorData that stores durations in seconds.",
+        dtype="float64",
+        dims=["num_events"],
+        shape=[None],
+        attributes=[
+            NWBAttributeSpec(
+                name="unit",
+                dtype="text",
+                doc="The unit of measurement for the durations, fixed to 'seconds'.",
+                value="seconds",
+            ),
+            # NOTE: this is usually the same as the timestamp resolution
+            NWBAttributeSpec(
+                name="resolution",
+                dtype="float64",
+                doc=(
+                    "The smallest possible difference between two timestamps. Usually 1 divided by the "
+                    "sampling rate for timestamps of the data acquisition system."
+                ),
+                required=False,
+            ),
+        ],
     )
 
-    description_col = NWBDatasetSpec(
-        name='event_description',
-        neurodata_type_inc='VectorData',
-        dtype='text',
-        doc='Description for each event type.',
+    event_types_table = NWBGroupSpec(
+        neurodata_type_def="EventTypesTable",
+        neurodata_type_inc="DynamicTable",
+        doc="A column-based table to store information about each event type, such as name, one event type per row.",
+        default_name="EventTypesTable",
+        datasets=[
+            NWBDatasetSpec(
+                name="event_name",
+                neurodata_type_inc="VectorData",
+                dtype="text",
+                doc="Name of each event type.",
+            ),
+            NWBDatasetSpec(
+                name="event_type_description",
+                neurodata_type_inc="VectorData",
+                dtype="text",
+                doc="Description of each event type.",
+            ),
+        ],
     )
 
-    annotated_events_table = NWBGroupSpec(
-        neurodata_type_def='AnnotatedEventsTable',
-        neurodata_type_inc='DynamicTable',
-        doc=("Table to hold event timestamps and event metadata relevant to data preprocessing and analysis. Each "
-             "row corresponds to a different event type. Use the 'event_times' dataset to store timestamps for each "
-             "event type. Add user-defined columns to add metadata for each event type or event time."),
-        datasets=[event_times_index, event_times, label_col, description_col],
+    events_table = NWBGroupSpec(
+        neurodata_type_def="EventsTable",
+        neurodata_type_inc="DynamicTable",
+        doc=(
+            "A column-based table to store information about events (event instances), one event per row. "
+            "Each event must have an event_type, which is a reference to a row in the EventTypesTable. "
+            "Additional columns may be added to store metadata about each event, such as the duration "
+            "of the event, or a text value of the event."
+        ),
+        # NOTE: custom columns should apply to every event in the table which may not be the case
+        default_name="EventsTable",
+        datasets=[
+            NWBDatasetSpec(
+                name="timestamp",
+                neurodata_type_inc="TimestampVectorData",
+                doc="The time that each event occurred, in seconds, from the session start time.",
+            ),
+            NWBDatasetSpec(
+                name="event_type",
+                neurodata_type_inc="DynamicTableRegion",
+                dims=["num_events"],
+                shape=[None],
+                doc=(
+                    "The type of event that occurred. This is represented as a reference "
+                    "to a row of the EventTypesTable."
+                ),
+                quantity="?",
+            ),
+            NWBDatasetSpec(
+                name="duration",
+                neurodata_type_inc="DurationVectorData",
+                doc="Optional column containing the duration of each event, in seconds.",
+                quantity="?",
+            ),
+        ],
     )
 
-    new_data_types = [events, labeled_events, ttls, annotated_events_table]
+    ttl_types_table = NWBGroupSpec(
+        neurodata_type_def="TtlTypesTable",
+        neurodata_type_inc="EventTypesTable",
+        doc=(
+            "A column-based table to store information about each TTL type, such as name and pulse value, "
+            "one TTL type per row."
+        ),
+        default_name="TtlTypesTable",
+        datasets=[
+            NWBDatasetSpec(
+                name="pulse_value",
+                neurodata_type_inc="VectorData",
+                dtype="uint8",
+                doc="TTL pulse value for each event type.",
+            ),
+        ],
+    )
+
+    ttls_table = NWBGroupSpec(
+        neurodata_type_def="TtlsTable",
+        neurodata_type_inc="EventsTable",
+        doc="Data type to hold timestamps of TTL pulses.",
+        default_name="TtlsTable",
+        datasets=[
+            NWBDatasetSpec(
+                name="ttl_type",
+                neurodata_type_inc="DynamicTableRegion",
+                dims=["num_events"],
+                shape=[None],
+                doc="The type of TTL that occurred. This is represented as a reference to a row of the TtlTypesTable.",
+            ),
+        ],
+    )
+
+    task = NWBGroupSpec(
+        neurodata_type_def="Task",
+        neurodata_type_inc="LabMetaData",
+        doc=(
+            "A group to store task-related general metadata. TODO When merged with core, "
+            "this will no longer inherit from LabMetaData but from NWBContainer and be placed "
+            "optionally in /general."
+        ),
+        name="task",
+        groups=[
+            NWBGroupSpec(
+                name="event_types",
+                neurodata_type_inc="EventTypesTable",
+                doc="Table to store information about each task event type.",
+                quantity="?",
+            ),
+            NWBGroupSpec(
+                name="ttl_types",
+                neurodata_type_inc="TtlTypesTable",
+                doc="Table to store information about each task TTL type.",
+                quantity="?",
+            ),
+        ],
+    )
+
+    new_data_types = [
+        timestamp_vector_data,
+        duration_vector_data,
+        event_types_table,
+        events_table,
+        ttl_types_table,
+        ttls_table,
+        task,
+    ]
 
     # export the spec to yaml files in the spec folder
-    output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'spec'))
+    output_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "spec"))
     export_spec(ns_builder, new_data_types, output_dir)
 
 

@@ -1,96 +1,114 @@
-groups:
-- neurodata_type_def: Events
-  neurodata_type_inc: NWBDataInterface
-  doc: A list of timestamps, stored in seconds, of an event.
+datasets:
+- neurodata_type_def: TimestampVectorData
+  neurodata_type_inc: VectorData
+  dtype: float64
+  dims:
+  - num_times
+  shape:
+  - null
+  doc: A VectorData that stores timestamps in seconds.
   attributes:
-  - name: description
+  - name: unit
     dtype: text
-    doc: Description of the event.
-  datasets:
-  - name: timestamps
-    dtype: float32
-    dims:
-    - num_events
-    shape:
-    - null
-    doc: Event timestamps, in seconds, relative to the common experiment master-clock
-      stored in NWBFile.timestamps_reference_time.
-    attributes:
-    - name: unit
-      dtype: text
-      value: seconds
-      doc: Unit of measurement for timestamps, which is fixed to 'seconds'.
-    - name: resolution
-      dtype: float32
-      doc: The smallest possible difference between two event times. Usually 1 divided
-        by the event time sampling rate on the data acquisition system.
-      required: false
-- neurodata_type_def: LabeledEvents
-  neurodata_type_inc: Events
-  doc: A list of timestamps, stored in seconds, of an event that can have different
-    labels. For example, this type could represent the times that reward was given,
-    as well as which of three different types of reward was given. In this case, the
-    'data' dataset would contain values {0, 1, 2}, its 'labels' attribute would contain
-    three text elements, where the first (index 0) specifies the name of the reward
-    associated with data = 0, the second (index 1) specifies the name of the reward
-    associated with data = 1, etc. The labels do not have to start at 0 and do not
-    need to be continuous, e.g. the 'data' dataset could contain values {0, 10, 100},
-    and the 'labels' attribute could contain 101 values, where labels[0] is 'No reward',
-    labels[10] is '10% reward', labels[100] is 'Full reward', and all other entries
-    in 'labels' are the empty string.
-  datasets:
-  - name: data
-    dtype: uint8
-    dims:
-    - num_events
-    shape:
-    - null
-    doc: Unsigned integer labels that map onto strings using the mapping in the 'labels'
-      array attribute. This dataset should have the same number of elements as the
-      'timestamps' dataset.
-    attributes:
-    - name: labels
-      dtype: text
-      dims:
-      - num_labels
-      shape:
-      - null
-      doc: Mapping from an unsigned integer (the zero-based index) to a string, used
-        to understand the values in the 'data' dataset. Use an empty string to represent
-        a label value that is not mapped to any text.
-- neurodata_type_def: TTLs
-  neurodata_type_inc: LabeledEvents
-  doc: Data type to hold timestamps of TTL pulses. The 'data' dataset contains the
-    integer pulse values (or channel IDs), and the 'labels' dataset contains user-defined
-    labels associated with each pulse value (or channel ID). The value at index i
-    of the 'labels' dataset corresponds to a pulse value (or channel ID) of i in the
-    'data' dataset. For example, the first value (index 0) of the 'labels' dataset
-    corresponds to a pulse value of 0. See the LabeledEvents type for more details.
-- neurodata_type_def: AnnotatedEventsTable
+    value: seconds
+    doc: The unit of measurement for the timestamps, fixed to 'seconds'.
+  - name: resolution
+    dtype: float64
+    doc: The smallest possible difference between two timestamps. Usually 1 divided
+      by the sampling rate for timestamps of the data acquisition system.
+    required: false
+- neurodata_type_def: DurationVectorData
+  neurodata_type_inc: VectorData
+  dtype: float64
+  dims:
+  - num_events
+  shape:
+  - null
+  doc: A VectorData that stores durations in seconds.
+  attributes:
+  - name: unit
+    dtype: text
+    value: seconds
+    doc: The unit of measurement for the durations, fixed to 'seconds'.
+  - name: resolution
+    dtype: float64
+    doc: The smallest possible difference between two timestamps. Usually 1 divided
+      by the sampling rate for timestamps of the data acquisition system.
+    required: false
+groups:
+- neurodata_type_def: EventTypesTable
   neurodata_type_inc: DynamicTable
-  doc: Table to hold event timestamps and event metadata relevant to data preprocessing
-    and analysis. Each row corresponds to a different event type. Use the 'event_times'
-    dataset to store timestamps for each event type. Add user-defined columns to add
-    metadata for each event type or event time.
+  default_name: EventTypesTable
+  doc: A column-based table to store information about each event type, such as name,
+    one event type per row.
   datasets:
-  - name: event_times_index
-    neurodata_type_inc: VectorIndex
-    doc: Index into the event_times dataset.
-  - name: event_times
-    neurodata_type_inc: VectorData
-    dtype: float32
-    doc: Event times for each event type.
-    attributes:
-    - name: resolution
-      dtype: float32
-      doc: The smallest possible difference between two event times. Usually 1 divided
-        by the event time sampling rate on the data acquisition system.
-      required: false
-  - name: label
+  - name: event_name
     neurodata_type_inc: VectorData
     dtype: text
-    doc: Label for each event type.
-  - name: event_description
+    doc: Name of each event type.
+  - name: event_type_description
     neurodata_type_inc: VectorData
     dtype: text
-    doc: Description for each event type.
+    doc: Description of each event type.
+- neurodata_type_def: EventsTable
+  neurodata_type_inc: DynamicTable
+  default_name: EventsTable
+  doc: A column-based table to store information about events (event instances), one
+    event per row. Each event must have an event_type, which is a row in the EventTypesTable.
+    Additional columns may be added to store metadata about each event, such as the
+    duration of the event, or a text value of the event.
+  datasets:
+  - name: timestamp
+    neurodata_type_inc: TimestampVectorData
+    doc: The time that each event occurred, in seconds, from the session start time.
+  - name: event_type
+    neurodata_type_inc: DynamicTableRegion
+    dims:
+    - num_events
+    shape:
+    - null
+    doc: The type of event that occurred. This is represented as a reference to a
+      row of the EventTypesTable.
+    quantity: '?'
+  - name: duration
+    neurodata_type_inc: DurationVectorData
+    doc: Optional column containing the duration of each event, in seconds.
+    quantity: '?'
+- neurodata_type_def: TtlTypesTable
+  neurodata_type_inc: EventTypesTable
+  default_name: TtlTypesTable
+  doc: A column-based table to store information about each TTL type, such as name
+    and pulse value, one TTL type per row.
+  datasets:
+  - name: pulse_value
+    neurodata_type_inc: VectorData
+    dtype: uint8
+    doc: TTL pulse value for each event type.
+- neurodata_type_def: TtlsTable
+  neurodata_type_inc: EventsTable
+  default_name: TtlsTable
+  doc: Data type to hold timestamps of TTL pulses.
+  datasets:
+  - name: ttl_type
+    neurodata_type_inc: DynamicTableRegion
+    dims:
+    - num_events
+    shape:
+    - null
+    doc: The type of TTL that occurred. This is represented as a reference to a row
+      of the TtlTypesTable.
+- neurodata_type_def: Task
+  neurodata_type_inc: LabMetaData
+  name: task
+  doc: A group to store task-related general metadata. TODO When merged with core,
+    this will no longer inherit from LabMetaData but from NWBContainer and be placed
+    optionally in /general.
+  groups:
+  - name: event_types
+    neurodata_type_inc: EventTypesTable
+    doc: Table to store information about each task event type.
+    quantity: '?'
+  - name: ttl_types
+    neurodata_type_inc: TtlTypesTable
+    doc: Table to store information about each task TTL type.
+    quantity: '?'
