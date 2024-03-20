@@ -1,6 +1,6 @@
 # pinned dependencies to reproduce an entire development environment to
 # run tests, check code style, and generate documentation
-black==23.9.1
+black==24.3.0
 codespell==2.2.6
 coverage==7.3.2
 hdmf==3.11.0
