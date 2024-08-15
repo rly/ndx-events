@@ -18,7 +18,7 @@ def main():
         neurodata_type_def="TimestampVectorData",
         neurodata_type_inc="VectorData",
         doc="A 1-dimensional VectorData that stores timestamps in seconds.",
-        dtype="float64",
+        dtype="float",
         dims=["num_times"],
         shape=[None],
         attributes=[
@@ -33,7 +33,7 @@ def main():
             # maybe this should be a column of the event type table instead?
             NWBAttributeSpec(
                 name="resolution",
-                dtype="float64",
+                dtype="float",
                 doc=(
                     "The smallest possible difference between two timestamps. Usually 1 divided by the "
                     "sampling rate for timestamps of the data acquisition system."
@@ -47,7 +47,7 @@ def main():
         neurodata_type_def="DurationVectorData",
         neurodata_type_inc="VectorData",
         doc="A 1-dimensional VectorData that stores durations in seconds.",
-        dtype="float64",
+        dtype="float",
         dims=["num_events"],
         shape=[None],
         attributes=[
@@ -60,7 +60,7 @@ def main():
             # NOTE: this is usually the same as the timestamp resolution
             NWBAttributeSpec(
                 name="resolution",
-                dtype="float64",
+                dtype="float",
                 doc=(
                     "The smallest possible difference between two timestamps. Usually 1 divided by the "
                     "sampling rate for timestamps of the data acquisition system."
