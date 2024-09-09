@@ -44,43 +44,42 @@ dependencies = [
 "Discussions" = "https://github.com/rly/ndx-events/discussions"
 "Changelog" = "https://github.com/rly/ndx-events/CHANGELOG.md"
 
-[tool.hatch.build]
-include = [
-    "src/pynwb",
-    "spec/ndx-events.extensions.yaml",
-    "spec/ndx-events.namespace.yaml",
-]
-exclude = [
-    "src/pynwb/tests",
-]
-
+# Include only the source code under `src/pynwb/ndx_events` and the spec files under `spec`
+# in the wheel.
 [tool.hatch.build.targets.wheel]
 packages = [
     "src/pynwb/ndx_events",
     "spec"
 ]
 
+# Rewrite the path to the `spec` directory to `ndx_events/spec`.
+# `ndx_events/__init__.py` will look there first for the spec files.
+# The resulting directory structure within the wheel will be:
+# ndx_events/
+# ├── __init__.py
+# ├── spec
+# └── widgets
 [tool.hatch.build.targets.wheel.sources]
 "spec" = "ndx_events/spec"
 
+# The source distribution includes everything in the package except for the `src/matnwb` directory and
+# git and github-related files.
 [tool.hatch.build.targets.sdist]
-include = [
-    "src/pynwb",
-    "spec/ndx-events.extensions.yaml",
-    "spec/ndx-events.namespace.yaml",
-    "docs",
+exclude = [
+    ".git*",
+    "src/matnwb",
 ]
-exclude = []
 
 [tool.pytest.ini_options]
-addopts = "--cov --cov-report html"
+# uncomment below to run pytest always with code coverage reporting. NOTE: breakpoints may not work
+# addopts = "--cov --cov-report html"
 
 [tool.codespell]
 skip = "htmlcov,.git,.mypy_cache,.pytest_cache,.coverage,*.pdf,*.svg,venvs,.tox,hdmf-common-schema,./docs/_build/*,*.ipynb"
 
 [tool.coverage.run]
 branch = true
-source = ["src/pynwb"]
+source = ["ndx_events"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -94,19 +93,20 @@ preview = true
 exclude = ".git|.mypy_cache|.tox|.venv|venv|.ipynb_checkpoints|_build/|dist/|__pypackages__|.ipynb|docs/"
 
 [tool.ruff]
-select = ["E", "F", "T100", "T201", "T203"]
+lint.select = ["E", "F", "T100", "T201", "T203"]
 exclude = [
   ".git",
   ".tox",
   "__pycache__",
   "build/",
   "dist/",
+  "docs/source/conf.py",
 ]
 line-length = 120
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
+"src/pynwb/ndx_events/__init__.py" = ["E402", "F401"]
 "src/spec/create_extension_spec.py" = ["T201"]
-"src/pynwb/tests/test_example_usage.py" = ["T201"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 17
