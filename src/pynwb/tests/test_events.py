@@ -281,6 +281,7 @@ class TestEventsTable(TestCase):
             stimulus_type="",
             event_type=0,
             duration=0.1,
+            value="",
             # hed_tags=["(White, Circle)"],
         )
         events_table.add_row(
@@ -289,6 +290,7 @@ class TestEventsTable(TestCase):
             stimulus_type="animal",
             event_type=1,
             duration=0.15,
+            value="giraffe",
         )
         events_table.add_row(
             timestamp=1.1,
@@ -296,6 +298,7 @@ class TestEventsTable(TestCase):
             stimulus_type="",
             event_type=0,
             duration=0.1,
+            value="",
             # hed_tags=["(Green, Square)"],
         )
         events_table.add_row(
@@ -304,12 +307,14 @@ class TestEventsTable(TestCase):
             stimulus_type="landscape",
             event_type=1,
             duration=0.15,
+            value="farm",
         )
         assert events_table["timestamp"].data == [0.1, 0.3, 1.1, 1.3]
         assert events_table["cue_type"].data == ["white circle", "", "green square", ""]
         assert events_table["stimulus_type"].data == ["", "animal", "", "landscape"]
         assert events_table["duration"].data == [0.1, 0.15, 0.1, 0.15]
         assert events_table["event_type"].data == [0, 1, 0, 1]
+        assert events_table["value"].data == ["", "giraffe", "", "farm"]
         # assert events_table["hed_tags"][0] == ["(White, Circle)"]
         # assert events_table["hed_tags"][2] == ["(Green, Square)"]
 
@@ -350,6 +355,7 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             stimulus_type="",
             event_type=0,
             duration=0.1,
+            value="",
             # hed_tags=["(White, Circle)"],
         )
         events_table.add_row(
@@ -358,6 +364,7 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             stimulus_type="animal",
             event_type=1,
             duration=0.15,
+            value="giraffe",
         )
         events_table.add_row(
             timestamp=1.1,
@@ -365,6 +372,7 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             stimulus_type="",
             event_type=0,
             duration=0.1,
+            value="",
             # hed_tags=["(Green, Square)"],
         )
         events_table.add_row(
@@ -373,6 +381,7 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             stimulus_type="landscape",
             event_type=1,
             duration=0.15,
+            value="farm",
         )
 
         task = Task()
@@ -396,6 +405,7 @@ class TestEventsTableSimpleRoundtrip(TestCase):
             assert all(read_events_table["stimulus_type"].data[:] == ["", "animal", "", "landscape"])
             assert all(read_events_table["duration"].data[:] == [0.1, 0.15, 0.1, 0.15])
             assert all(read_events_table["event_type"].data[:] == [0, 1, 0, 1])
+            assert all(read_events_table["value"].data[:] == ["", "giraffe", "", "farm"])
             assert read_events_table["event_type"].table is read_event_types_table
 
 
