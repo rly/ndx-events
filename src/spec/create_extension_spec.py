@@ -26,7 +26,7 @@ def main():
                 name="unit",
                 dtype="text",
                 doc="The unit of measurement for the timestamps, fixed to 'seconds'.",
-                value="xseconds",
+                value="seconds",
             ),
             # NOTE: this requires all timestamps to have the same resolution which may not be true
             # if they come from different acquisition systems or processing pipelines...
