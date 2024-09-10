@@ -32,8 +32,8 @@ keywords = [
     'ndx-extension',
 ]
 dependencies = [
-    "pynwb>=2.5.0",
-    "hdmf>=3.11.0",
+    "pynwb>=2.8.2",
+    "hdmf>=3.14.4",
 ]
 
 # TODO: add URLs before release
@@ -107,6 +107,7 @@ line-length = 120
 [tool.ruff.lint.per-file-ignores]
 "src/pynwb/ndx_events/__init__.py" = ["E402", "F401"]
 "src/spec/create_extension_spec.py" = ["T201"]
+"src/pynwb/tests/test_example_usage.py" = ["T201"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 17
