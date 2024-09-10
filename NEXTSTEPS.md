@@ -1,31 +1,66 @@
-# Next Steps for ndx-events Extension for NWB:N
+
+
+# Next Steps for ndx-events Extension for NWB
 
 ## Creating Your Extension
 
-1. In a terminal, change directory into the new ndx-events directory.
+1. In a terminal, change directory into the new ndx-events directory: `cd ndx-events`
 
-2. Add any packages required by your extension to `requirements.txt` and `setup.py`.
+2. Add any packages required by your extension to the `dependencies` key in `pyproject.toml`.
 
-3. Run `python -m pip install -r requirements.txt` to install the `pynwb` package
-and any other packages required by your extension.
+3. Run `python -m pip install -e .` to install your new extension Python package
+and any other packages required to develop, document, and run your extension.
 
-4. Modify `src/create_extension_spec.py` to define your extension.
-
-    - If you want to create any custom classes for interacting with the extension,
-      add them to the `src/pynwb`.
-      - If present, the `src/pynwb` folder MUST contain the following:
-        - `ndx-events` - Folder with the sources of the NWB extension
-        - `ndx-events/__init__.py` - Python file that may be empty
-      - If present, the `src/pynwb` folder MAY contain the following files/folders:
-        - `test` - Folder for unit tests for the extensions
-        - `jupyter_widgets` - Optional package with custom widgets for use with Jupyter
+4. Modify `src/spec/create_extension_spec.py` to define your extension.
 
 5. Run `python src/spec/create_extension_spec.py` to generate the
 `spec/ndx-events.namespace.yaml` and
 `spec/ndx-events.extensions.yaml` files.
 
-6. You may need to modify `setup.py` and re-run `python setup.py install` if you
+6. Define API classes for your new extension data types.
+
+    - As a starting point, `src/pynwb/ndx_events/__init__.py` includes an
+      example for how to use
+      the `pynwb.get_class` to generate a basic Python class for your new extension data
+      type. This class contains a constructor and properties for the new data type.
+    - Instead of using `pynwb.get_class`, you can define your own custom class for the
+      new type, which will allow you to customize the class methods, customize the
+      object mapping, and create convenience functions. See the
+      [Extending NWB tutorial](https://pynwb.readthedocs.io/en/stable/tutorials/general/extensions.html)
+      for more details.
+
+7. Define tests for your new extension data types in
+`src/pynwb/ndx_events/tests` or `src/matnwb/tests`.
+A test for the example `TetrodeSeries` data type is provided as a reference and should be
+replaced or removed.
+
+     - Python tests should be runnable by executing [`pytest`](https://docs.pytest.org/en/latest/)
+     from the root of the extension directory. Use of PyNWB testing infrastructure from
+     `pynwb.testing` is encouraged (see
+     [documentation](https://pynwb.readthedocs.io/en/stable/pynwb.testing.html)).
+     - Creating both **unit tests** (e.g., testing initialization of new data type classes and
+     new functions) and **integration tests** (e.g., write the new data types to file, read
+     the file, and confirm the read data types are equal to the written data types) is
+     highly encouraged.
+     - By default, to aid with debugging, the project is configured NOT to run code coverage as
+     part of the tests.
+     Code coverage reporting is useful to help with creation of tests and report test coverage.
+     However, with this option enabled, breakpoints for debugging with pdb are being ignored.
+     To enable this option for code coverage reporting, uncomment out the following line in
+     your `pyproject.toml`: [line](https://github.com/nwb-extensions/ndx-template/blob/11ae225b3fd3934fa3c56e6e7b563081793b3b43/%7B%7B%20cookiecutter.namespace%20%7D%7D/pyproject.toml#L82-L83
+)
+
+7. (Optional) Define custom visualization widgets for your new extension data types in
+`src/pynwb/ndx_events/widgets` so that the visualizations can be displayed with
+[nwbwidgets](https://github.com/NeurodataWithoutBorders/nwbwidgets).
+You will also need to update the `vis_spec` dictionary in
+`src/pynwb/ndx_events/widgets/__init__.py` so that
+nwbwidgets can find your custom visualizations.
+
+8. You may need to modify `pyproject.toml` and re-run `python -m pip install -e .` if you
 use any dependencies.
+
+9. Update the `CHANGELOG.md` regularly to document changes to your extension.
 
 
 ## Documenting and Publishing Your Extension to the Community
@@ -48,16 +83,26 @@ your extension.
 
 7. Add a license file. Permissive licenses should be used if possible. **A [BSD license](https://opensource.org/licenses/BSD-3-Clause) is recommended.**
 
-8. Make a release for the extension on GitHub with the version number specified. e.g. if version is 0.1.0, then this page should exist: https://github.com/rly/ndx-events/releases/tag/0.1.0 . For instructions on how to make a release on GitHub see [here](https://help.github.com/en/github/administering-a-repository/creating-releases).
+8. Update the `CHANGELOG.md` to document changes to your extension.
 
-9. Publish your updated extension on PyPi.
-    - Follow these directions: https://packaging.python.org/tutorials/packaging-projects/
-    - You may need to modify `setup.py`
-    - If your extension version is 0.1.0, then this page should exist: https://pypi.org/project/ndx-events/0.1.0
+8. Push your repository to GitHub. A default set of GitHub Actions workflows is set up to
+test your code on Linux, Windows, Mac OS, and Linux using conda; upload code coverage
+stats to codecov.io; check for spelling errors; check for style errors; and check for broken
+links in the documentation. For the code coverage workflow to work, you will need to
+set up the repo on codecov.io and uncomment the "Upload coverage to Codecov" step
+in `.github/workflows/run_coverage.yml`.
 
-   Once your GitHub release and ``setup.py`` are ready, publishing on PyPi:
+8. Make a release for the extension on GitHub with the version number specified. e.g. if version is 0.3.0, then this page should exist: https://github.com/rly/ndx-events/releases/tag/0.3.0 . For instructions on how to make a release on GitHub see [here](https://help.github.com/en/github/administering-a-repository/creating-releases).
+
+9. Publish your updated extension on [PyPI](https://pypi.org/).
+    - Follow these directions: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+    - You may need to modify `pyproject.toml`
+    - If your extension version is 0.3.0, then this page should exist: https://pypi.org/project/ndx-events/0.3.0
+
+   Once your GitHub release and `pyproject.toml` are ready, publishing on PyPI:
     ```bash
-    python setup.py sdist bdist_wheel
+    python -m pip install --upgrade build twine
+    python -m build
     twine upload dist/*
     ```
 
@@ -81,28 +126,26 @@ with information on where to find your NWB extension.
       - src: URL for the main page of the public repository (e.g. on GitHub, BitBucket, GitLab) that contains the sources of the extension
       - pip: URL for the main page of the extension on PyPI
       - license: name of the license of the extension
-      - maintainers: list of GitHub
-      usernames of those who will reliably maintain the extension
-    -
+      - maintainers: list of GitHub usernames of those who will reliably maintain the extension
+    - You may copy and modify the following YAML that was auto-generated:
 
-  You may copy and modify the following YAML that was auto-generated:
-```yaml
-name: ndx-events
-version: 0.1.0
-src: https://github.com/rly/ndx-events
-pip: https://pypi.org/project/ndx-events/
-license: BSD 3-Clause
-maintainers:
-  - rly
-```
+      ```yaml
+      name: ndx-events
+      version: 0.3.0
+      src: https://github.com/rly/ndx-events
+      pip: https://pypi.org/project/ndx-events/
+      license: BSD-3
+      maintainers:
+        - rly
+      ```
 
 14. Edit `staged-extensions/ndx-events/README.md`
 to add information about your extension. You may copy it from
 `ndx-events/README.md`.
 
   ```bash
-cp ndx-events/README.md staged-extensions/ndx-events/README.md
-```
+  cp ndx-events/README.md staged-extensions/ndx-events/README.md
+  ```
 
 15. Add and commit your changes to Git and push your changes to GitHub.
 ```
@@ -117,7 +160,7 @@ Mac, and Linux. The technical team will review your extension shortly after
 and provide feedback and request changes, if any.
 
 17. When your pull request is merged, a new repository, called
-ndx-events-feedstock will be created in the nwb-extensions
+ndx-events-record will be created in the nwb-extensions
 GitHub organization and you will be added as a maintainer for that repository.
 
 
@@ -125,12 +168,12 @@ GitHub organization and you will be added as a maintainer for that repository.
 
 1. Update your ndx-events GitHub repository.
 
-2. Publish your updated extension on PyPi.
+2. Publish your updated extension on PyPI.
 
-3. Fork the ndx-events-feedstock repository on GitHub.
+3. Fork the ndx-events-record repository on GitHub.
 
 4. Open a pull request to test the changes automatically. The technical team
 will review your changes shortly after and provide feedback and request changes,
- if any.
+if any.
 
 5. Your updated extension is approved.

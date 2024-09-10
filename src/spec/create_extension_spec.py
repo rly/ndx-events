@@ -26,7 +26,7 @@ def main():
                 name="unit",
                 dtype="text",
                 doc="The unit of measurement for the timestamps, fixed to 'seconds'.",
-                value="xseconds",
+                value="seconds",
             ),
             # NOTE: this requires all timestamps to have the same resolution which may not be true
             # if they come from different acquisition systems or processing pipelines...
@@ -123,6 +123,19 @@ def main():
                 name="duration",
                 neurodata_type_inc="DurationVectorData",
                 doc="Optional column containing the duration of each event, in seconds.",
+                quantity="?",
+            ),
+            NWBDatasetSpec(
+                name="value",
+                neurodata_type_inc="VectorData",
+                doc=(
+                    "Optional column containing a value/parameter associated with each event. "
+                    "For example, if you have three levels of reward (e.g., 1 drop, 2 drops, "
+                    "3 drops), instead of encoding each level of reward as its own event "
+                    "type (e.g., 'reward_value_1', 'reward_value_2', 'reward_value_3', "
+                    "you could encode 'reward' as the event type, and the value for each "
+                    "event time could be 1, 2, or 3."
+                ),
                 quantity="?",
             ),
         ],

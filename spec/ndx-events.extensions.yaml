@@ -6,7 +6,7 @@ datasets:
   - num_times
   shape:
   - null
-  doc: A VectorData that stores timestamps in seconds.
+  doc: A 1-dimensional VectorData that stores timestamps in seconds.
   attributes:
   - name: unit
     dtype: text
@@ -24,7 +24,7 @@ datasets:
   - num_events
   shape:
   - null
-  doc: A VectorData that stores durations in seconds.
+  doc: A 1-dimensional VectorData that stores durations in seconds.
   attributes:
   - name: unit
     dtype: text
@@ -54,9 +54,9 @@ groups:
   neurodata_type_inc: DynamicTable
   default_name: EventsTable
   doc: A column-based table to store information about events (event instances), one
-    event per row. Each event must have an event_type, which is a row in the EventTypesTable.
-    Additional columns may be added to store metadata about each event, such as the
-    duration of the event, or a text value of the event.
+    event per row. Each event must have an event_type, which is a reference to a row
+    in the EventTypesTable. Additional columns may be added to store metadata about
+    each event, such as the duration of the event, or a text value of the event.
   datasets:
   - name: timestamp
     neurodata_type_inc: TimestampVectorData
@@ -73,6 +73,14 @@ groups:
   - name: duration
     neurodata_type_inc: DurationVectorData
     doc: Optional column containing the duration of each event, in seconds.
+    quantity: '?'
+  - name: value
+    neurodata_type_inc: VectorData
+    doc: Optional column containing a value/parameter associated with each event.
+      For example, if you have three levels of reward (e.g., 1 drop, 2 drops, 3 drops),
+      instead of encoding each level of reward as its own event type (e.g., 'reward_value_1',
+      'reward_value_2', 'reward_value_3', you could encode 'reward' as the event type,
+      and the value for each event time could be 1, 2, or 3.
     quantity: '?'
 - neurodata_type_def: TtlTypesTable
   neurodata_type_inc: EventTypesTable
