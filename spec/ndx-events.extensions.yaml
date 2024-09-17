@@ -1,7 +1,7 @@
 datasets:
 - neurodata_type_def: TimestampVectorData
   neurodata_type_inc: VectorData
-  dtype: float64
+  dtype: float
   dims:
   - num_times
   shape:
@@ -13,13 +13,13 @@ datasets:
     value: seconds
     doc: The unit of measurement for the timestamps, fixed to 'seconds'.
   - name: resolution
-    dtype: float64
+    dtype: float
     doc: The smallest possible difference between two timestamps. Usually 1 divided
       by the sampling rate for timestamps of the data acquisition system.
     required: false
 - neurodata_type_def: DurationVectorData
   neurodata_type_inc: VectorData
-  dtype: float64
+  dtype: float
   dims:
   - num_events
   shape:
@@ -31,7 +31,7 @@ datasets:
     value: seconds
     doc: The unit of measurement for the durations, fixed to 'seconds'.
   - name: resolution
-    dtype: float64
+    dtype: float
     doc: The smallest possible difference between two timestamps. Usually 1 divided
       by the sampling rate for timestamps of the data acquisition system.
     required: false
