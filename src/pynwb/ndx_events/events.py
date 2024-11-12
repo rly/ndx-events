@@ -48,7 +48,7 @@ class NdxEventsNWBFile(NWBFile):
         super().__init__(**kwargs)
         self.events = events
 
-    def merge_events_tables(self, tables: list[EventsTable]):
+    def merge_events_tables(self, tables):  # tables: list[EventsTable]
         return pd.concat([table.to_dataframe().set_index("timestamp") for table in tables], sort=True)
 
     def get_all_events(self):
