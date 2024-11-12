@@ -74,6 +74,69 @@ generateExtension('<directory path>/ndx-events/spec/ndx-events.namespace.yaml');
 1. [Example writing TTL pulses and stimulus presentations to an NWB file](examples/write_ttls_events.py).
 
 
+## Diagram
+
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#ffffff', "primaryBorderColor': '#144E73', 'lineColor': '#D96F32'}}}%%
+
+
+classDiagram
+    direction LR
+
+    class TimestampVectorData {
+        <<VectorData>>
+
+        data : NDArray[Shape["*"], Float]
+        --> unit : str = "seconds"
+        resolution : float, optional
+    }
+
+    class DurationVectorData {
+        <<VectorData>>
+
+        data : NDArray[Shape["*"], Float]
+        --> unit : str = "seconds"
+        resolution : float, optional
+    }
+
+    class CategoricalVectorData {
+        <<VectorData>>
+
+        data : NDArray[Shape["*"], Any]
+        meanings : MeaningsTable
+        filter_values : NDArray[Shape["*"], String], optional
+    }
+
+    class MeaningsTable {
+        <<DynamicTable>>
+
+        value : VectorData[NDArray[Shape["*"], Any]]
+        meaning : VectorData[NDArray[Shape["*"], String]]
+    }
+
+    class EventsTable {
+        <<DynamicTable>>
+
+        timestamp : TimestampVectorData
+        duration : DurationVectorData, optional
+        meanings_tables : list[MeaningsTable]
+    }
+
+    class NdxEventsNWBFile {
+        <<NWBFile>>
+
+        events : list[EventsTable]
+    }
+
+    CategoricalVectorData ..> MeaningsTable : object reference
+    EventsTable "1" *--> "0..*" MeaningsTable : contains
+    EventsTable "1" *--> "1..*" TimestampVectorData : contains
+    EventsTable "1" *--> "0..*" DurationVectorData : contains
+    EventsTable "1" *--> "0..*" CategoricalVectorData : contains
+    NdxEventsNWBFile "1" *--> "0..*" EventsTable : contains
+```
+
 ## Developer installation
 
 In a Python 3.8-3.12 environment:
