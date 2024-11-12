@@ -121,6 +121,7 @@ classDiagram
         timestamp : TimestampVectorData
         duration : DurationVectorData, optional
         meanings_tables : list[MeaningsTable]
+        [additional_columns] : list[VectorData], optional
     }
 
     class NdxEventsNWBFile {
