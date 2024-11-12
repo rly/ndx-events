@@ -1,5 +1,5 @@
 import os
-from pynwb import load_namespaces, get_class
+from pynwb import load_namespaces
 
 try:
     from importlib.resources import files
@@ -19,13 +19,18 @@ if not os.path.exists(__spec_path):
 load_namespaces(str(__spec_path))
 
 # Define the new classes
-Task = get_class("Task", "ndx-events")
-TimestampVectorData = get_class("TimestampVectorData", "ndx-events")
-DurationVectorData = get_class("DurationVectorData", "ndx-events")
-EventTypesTable = get_class("EventTypesTable", "ndx-events")
-EventsTable = get_class("EventsTable", "ndx-events")
-TtlTypesTable = get_class("TtlTypesTable", "ndx-events")
-TtlsTable = get_class("TtlsTable", "ndx-events")
+from .events import (
+    TimestampVectorData,
+    DurationVectorData,
+    CategoricalVectorData,
+    MeaningsTable,
+    EventsTable,
+    NdxEventsNWBFile,
+)
+
+
+from .ndx_events_nwb_file_io import NdxEventsNWBFileMap
+
 
 # Remove these functions from the package
-del load_namespaces, get_class
+del load_namespaces

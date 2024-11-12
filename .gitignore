@@ -4,6 +4,9 @@
 # generated docs
 docs/source/_format_auto_docs
 
+# developer-specific files
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
