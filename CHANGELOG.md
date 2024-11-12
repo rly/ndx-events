@@ -1,5 +1,3 @@
 # Changelog for ndx-events
 
-## 0.3.0 (Upcoming)
-
-
+## 0.4.0 (Upcoming)

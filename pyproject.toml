@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ndx-events"
-version = "0.3.0"
+version = "0.4.0"
 authors = [
     { name="Ryan Ly", email="rly@lbl.gov" }
 ]
@@ -108,6 +108,7 @@ line-length = 120
 "src/pynwb/ndx_events/__init__.py" = ["E402", "F401"]
 "src/spec/create_extension_spec.py" = ["T201"]
 "src/pynwb/tests/test_example_usage.py" = ["T201"]
+"examples/*" = ["T201"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 17
