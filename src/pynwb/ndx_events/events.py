@@ -2,7 +2,7 @@ import numpy as np
 
 from pynwb import register_class
 from pynwb.core import NWBDataInterface, DynamicTable
-from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, get_docval
 
 
 @register_class('Events', 'ndx-events')
@@ -28,7 +28,7 @@ class Events(NWBDataInterface):
              'default': None})
     def __init__(self, **kwargs):
         description, timestamps, resolution = popargs('description', 'timestamps', 'resolution', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.description = description
         self.timestamps = timestamps
         self.resolution = resolution
@@ -72,7 +72,7 @@ class LabeledEvents(Events):
     def __init__(self, **kwargs):
         timestamps = getargs('timestamps', kwargs)
         data, labels = popargs('data', 'labels', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         if len(timestamps) != len(data):
             raise ValueError('Timestamps and data must have the same length: %d != %d'
                              % (len(timestamps), len(data)))
@@ -152,7 +152,7 @@ class AnnotatedEventsTable(DynamicTable):
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         resolution = popargs('resolution', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        super().__init__(**kwargs)
         self.resolution = resolution
 
     @docval({'name': 'label', 'type': str, 'doc': 'Label for each event type.'},
