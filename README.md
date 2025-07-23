@@ -1,8 +1,10 @@
 # ndx-events Extension for NWB
 
-This is an NWB extension for storing timestamped event data.
+ndx-events is an NWB extension for storing timestamped event data. Version 0.4.0 introduces significant breaking changes to the data types used for events, TTLs, and tasks in NWB files. Please see the [Changelog](CHANGELOG.md) for details. If you need to use the previous data types, please use version 0.2.1 of this extension.
 
-The latest version is 0.4.0. This is a major change from previous versions.
+ndx-events 0.4.0 implements the NWB Enhancement Proposal "[NWBEP001: Events](https://docs.google.com/document/d/1qcsjyFVX9oI_746RdMoDdmQPu940s0YtDjb1en1Xtdw/edit?tab=t.0#heading=h.o40x21ra4na6)". This NWBEP has been reviewed and approved by the NWB Technical Advisory Board and the NWBEP001 Review Working Group. It will be integrated into the NWB core standard in Summer 2025. To use these data types before that time, install this extension, but please note that after integration, the NWB team will recommend using the same data types from the NWB core standard instead of this extension.
+
+This extension provides the following new data types for storing event data in NWB files:
 
 1. A `TimestampVectorData` type that extends `VectorData` and stores a 1D array of timestamps (float32) in seconds
    - Values are in seconds from session start time (like all other timestamps in NWB)
@@ -46,27 +48,16 @@ The APIs would also provide the following interfaces:
 
 This extension was developed by Ryan Ly, Oliver Rübel, the NWB Technical Advisory Board, and the NWBEP001 Review Working Group.
 
-Information about the rationale, background, and alternative approaches to this extension can be found here:
-https://docs.google.com/document/d/1qcsjyFVX9oI_746RdMoDdmQPu940s0YtDjb1en1Xtdw
-
 ## Installation
 
-The latest **ndx-events 0.4.0** has not yet been released on PyPI. To install it on Python, use:
-```bash
-pip install git+https://github.com/rly/ndx-events.git
-```
-
-ndx-events 0.3.0 was not released on PyPI.
-
-To install the 0.2.0 version, use:
-Python:
+To install the latest release of this extension, use the following command:
 ```bash
 pip install -U ndx-events
 ```
 
-Matlab:
-```matlab
-generateExtension('<directory path>/ndx-events/spec/ndx-events.namespace.yaml');
+To install the 0.2.1 version, use:
+```bash
+pip install ndx-events==0.2.1
 ```
 
 ## Usage examples
@@ -140,7 +131,7 @@ classDiagram
 
 ## Developer installation
 
-In a Python 3.8-3.12 environment:
+In a Python 3.8-3.13 environment:
 ```bash
 pip install -r requirements-dev.txt
 pip install -e .

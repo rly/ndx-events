@@ -7,11 +7,11 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "ndx-events"
-copyright = "2024, Ryan Ly"
+copyright = "2025, Ryan Ly"
 author = "Ryan Ly"
 
 version = "0.4.0"
-release = "alpha"
+release = "0.4.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

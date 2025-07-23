@@ -21,7 +21,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     env:  # used by codecov-action
       OS: ${{ matrix.os }}
-      PYTHON: '3.12'
+      PYTHON: '3.13'
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
