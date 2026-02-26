@@ -1,7 +1,7 @@
 from pynwb import register_map
-from pynwb.io.core import NWBContainerMapper
+from pynwb.io.core import NWBContainerMapper, VectorDataMap as PynwbVectorDataMap
 from hdmf.common.io.table import DynamicTableMap
-from hdmf.build import ObjectMapper, BuildManager
+from hdmf.build import BuildManager
 from hdmf.common import VectorData
 from hdmf.utils import getargs, docval
 from hdmf.spec import AttributeSpec
@@ -50,7 +50,7 @@ class AnnotatedEventsTableMap(DynamicTableMap):
 
 
 @register_map(VectorData)
-class VectorDataMap(ObjectMapper):
+class VectorDataMap(PynwbVectorDataMap):
 
     # TODO when merging into NWB core, fold this into pynwb.io.core.VectorDataMap
 

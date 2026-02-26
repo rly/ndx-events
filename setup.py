@@ -22,7 +22,7 @@ except Exception:
 
 setup_args = {
     'name': 'ndx-events',
-    'version': '0.2.1',
+    'version': '0.2.2',
     'description': 'NWB extension for storing timestamped event and TTL pulse data',
     'long_description': readme,
     'long_description_content_type': readme_type,
